@@ -14,14 +14,14 @@ function tabulate_results(results::MCMCSample)
     # proposals && tabulate_proposals(results)
     ## samples
     # println("MCMC results:")
-    h = ["θ", "E[θ]", ":σ", "SRE", "SRE975"]
+    h = ["θ", "E[θ]", ":σ", "PSRF", "PSRF975"]
     d = Matrix(undef, length(results.samples.mu), 5)
     sd = compute_sigma(results.samples.cv)
     d[:,1] .= 1:length(results.samples.mu)
     d[:,2] .= round.(results.samples.mu; sigdigits = C_PR_SIGDIG)
     d[:,3] .= round.(sd; sigdigits = C_PR_SIGDIG)
-    d[:,4] .= round.(results.sre[:,2]; sigdigits = C_PR_SIGDIG + 1)
-    d[:,5] .= round.(results.sre[:,3]; sigdigits = C_PR_SIGDIG + 1)
+    d[:,4] .= round.(results.psrf[:,2]; sigdigits = C_PR_SIGDIG + 1)
+    d[:,5] .= round.(results.psrf[:,3]; sigdigits = C_PR_SIGDIG + 1)
     PrettyTables.pretty_table(d, h)
 end
 

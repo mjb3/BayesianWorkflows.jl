@@ -162,7 +162,7 @@ function print_results(results::ARQMCMCSample, dpath::String)
     # ## print importance sample
     # print_imp_sample(results.imp_sample, dpath)
     # # print MCMC resamples
-    # print_rej_sample(results.samples, dpath, results.sre)
+    # print_rej_sample(results.samples, dpath, results.psrf)
 end
 
 ## print MCMC sample
@@ -175,5 +175,5 @@ function print_results(results::MCMCSample, dpath::String)
         write(f, "$(length(results.samples.mu)),$(results.adapt_period),$(results.run_time)")
     end
     # print rejection/re samples
-    print_rej_sample(results.samples, dpath, results.sre)
+    print_rej_sample(results.samples, dpath, results.psrf)
 end

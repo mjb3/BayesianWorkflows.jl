@@ -72,7 +72,7 @@ function run_inner_mcmc_analysis(mdl::LikelihoodModel, da::Bool, steps::Int64, b
     end
     ## compute scale reduction factor est.
     rejs = handle_rej_samples(samples, burnin)      # shared HMM functions
-    sre = gelman_diagnostic(samples, burnin).sre
+    sre = gelman_diagnostic(samples, burnin).psrf
     ## get importance sample
     theta_w = collect_theta_weight(grid, n_theta)
     is_mu = zeros(n_theta)

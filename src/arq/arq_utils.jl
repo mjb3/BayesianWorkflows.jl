@@ -41,16 +41,16 @@ function tabulate_results(results::ARQMCMCSample; display::Bool = true)
     d[:,3] .= round.(rj_sd; sigdigits = C_PR_SIGDIG)
     d[:,4] .= round.(results.imp_sample.mu; sigdigits = C_PR_SIGDIG)
     d[:,5] .= round.(is_sd; sigdigits = C_PR_SIGDIG)
-    d[:,6] .= round.(results.rej_sample.sre[:,2]; sigdigits = C_PR_SIGDIG)
-    d[:,7] .= round.(results.rej_sample.sre[:,3]; sigdigits = C_PR_SIGDIG)
+    d[:,6] .= round.(results.rej_sample.psrf[:,2]; sigdigits = C_PR_SIGDIG)
+    d[:,7] .= round.(results.rej_sample.psrf[:,3]; sigdigits = C_PR_SIGDIG)
     # d[:,8] .= 0
     # bme_seq = C_DEBUG ? (1:2) : (1:1)
     # d[bme_seq,8] = round.(results.imp_sample.bme[bme_seq]; digits = 1)
     if display
-        h = ["θ", "E[θ]", ":σ", "E[f(θ)]", ":σ", "SRE", "SRE975"]
+        h = ["θ", "E[θ]", ":σ", "E[f(θ)]", ":σ", "PSRF", "PSRF975"]
         PrettyTables.pretty_table(d, h)
     else
-        h = ["θ", "e_x", "sd_x", "e_fx", "sd_fx", "SRE", "SRE975"]
+        h = ["θ", "e_x", "sd_x", "e_fx", "sd_fx", "PSRF", "PSRF975"]
         return DataFrames.DataFrame(d, h)
     end
 end
@@ -103,5 +103,5 @@ function save_to_file(results::ARQMCMCSample, dpath::String)
         end
     end
     print_imp_sample(results.imp_sample, dpath)         # print importance sample
-    print_rej_sample(results.samples, dpath, results.sre)   # print MCMC resamples
+    print_rej_sample(results.samples, dpath, results.psrf)   # print MCMC resamples
 end

@@ -12,7 +12,7 @@
 
 A well-known example is the **Kermack-McKendrick susceptible-infectious-susceptible (SIR)** model:
 ```@raw html
-<img src="https://raw.githubusercontent.com/mjb3/DiscretePOMP.jl/master/docs/img/sir.png" alt="SIR model" style="height: 80px;"/>
+<img src="https://raw.githubusercontent.com/mjb3/BayesianWorkflows.jl/master/docs/img/sir.png" alt="SIR model" style="height: 80px;"/>
 ```
 
 See the [Simple example](@ref) for a brief primer on DSS.
@@ -65,7 +65,7 @@ using Pkg
 Pkg.add(url="https://github.com/ScottishCovidResponse/DataRegistryUtils.jl")
 ```
 
-See the package [code repository](https://github.com/mjb3/DiscretePOMP.jl) to inspect the source code.
+See the package [code repository](https://github.com/mjb3/BayesianWorkflows.jl) to inspect the source code.
 
 ## Documentation
 

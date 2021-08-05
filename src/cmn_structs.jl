@@ -102,7 +102,7 @@ The results of an MCMC analysis, mainly consisting of a `RejectionSample`.
 struct MCMCSample
     samples::RejectionSample
     adapt_period::Int64
-    sre::Array{Float64,2}
+    psrf::Array{Float64,2}
     run_time::UInt64
 end
 

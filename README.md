@@ -1,8 +1,8 @@
-# DiscretePOMP.jl
-**Bayesian inference for Discrete-state-space Partially Observed Markov Processes in Julia**
+# BayesianWorkflows.jl
+**Bayesian inference workflows for (mainly) Discrete-state-space Partially Observed Markov Process (DPOMP) models in Julia**
 
-![Documentation](https://github.com/mjb3/DiscretePOMP.jl/workflows/Documentation/badge.svg)
-![Package tests](https://github.com/mjb3/DiscretePOMP.jl/workflows/Tests/badge.svg)
+![Documentation](https://github.com/mjb3/BayesianWorkflows.jl/workflows/Documentation/badge.svg)
+![Package tests](https://github.com/mjb3/BayesianWorkflows.jl/workflows/Tests/badge.svg)
 
 This package contains tools for Bayesian inference and simulation of DPOMP models. See the [docs][docs].
 
@@ -33,11 +33,11 @@ The package is not registered and must be added via the package manager Pkg.
 From the Julia REPL type `]` to enter the Pkg mode, and run:
 
 ```
-pkg> add https://github.com/mjb3/DiscretePOMP.jl
+pkg> add https://github.com/mjb3/BayesianWorkflows.jl
 ```
 
 ### Usage
 
 See the [package documentation][docs] for instructions and examples.
 
-[docs]: https://mjb3.github.io/DiscretePOMP.jl/stable
+[docs]: https://mjb3.github.io/BayesianWorkflows.jl/stable

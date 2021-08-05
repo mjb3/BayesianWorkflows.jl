@@ -82,10 +82,10 @@ function gelman_diagnostic(samples::Array{Float64,3}, discard::Int64)
             sre[j,3] = sqrt(dd[j] * ((atmp / nsmpl) + Statistics.quantile(fdst, 0.975) * rr))
         end
         # return GelmanResults
-        return (mu = mu, wcv = sqrt.(w), sre = sre)
+        return (mu = mu, wcv = sqrt.(w), psrf = sre)
     catch gmn_err
         println("GELMAN ERROR: ", gmn_err)
-        return (mu = mu, wcv = sqrt.(w), sre = sre) # return zeros
+        return (mu = mu, wcv = sqrt.(w), psrf = sre) # return zeros
     end
 end
 
