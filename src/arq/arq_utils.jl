@@ -88,7 +88,7 @@ function save_to_file(results::ARQMCMCSample, dpath::String)
     isdir(dpath) || mkpath(dpath)                       # check dir
     open(string(dpath, "metadata.csv"), "w") do f       # print metadata
         write(f, "alg,np,adapt_period,sample_limit,sample_dispersal,run_time,fx,bme\narq,")
-        write(f, "$(length(results.imp_sample.mu)),$(results.adapt_period),$(results.sample_limit),$(results.sample_dispersal),$(results.run_time),$(sum(results.fx)),$(results.imp_sample.bme[1])")
+        write(f, "$(length(results.imp_sample.mu)),$(results.rej_sample.adapt_period),$(results.sample_limit),$(results.rej_sample.run_time),$(sum(results.fx)),$(results.imp_sample.bme[1])")
     end
     open(string(dpath, "sinterval.csv"), "w") do f      # print grid range
         write(f, "h")
@@ -103,5 +103,5 @@ function save_to_file(results::ARQMCMCSample, dpath::String)
         end
     end
     print_imp_sample(results.imp_sample, dpath)         # print importance sample
-    print_rej_sample(results.samples, dpath, results.psrf)   # print MCMC resamples
+    print_rej_sample(results.rej_sample.samples, dpath, results.rej_sample.psrf)   # print MCMC resamples
 end

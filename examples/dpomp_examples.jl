@@ -21,9 +21,10 @@ println(plot_trajectory(x))			# plot (optional)
 
 ## ARQMCMC
 sample_interval = [0.0005, 0.02]
-# results = BayesianWorkflows.run_arq_mcmc_analysis(model, prior, y, sample_interval)
-# tabulate_results(results)
-# println(plot_parameter_trace(results, 1))
+results = BayesianWorkflows.run_arq_mcmc_analysis(model, prior, y, sample_interval)
+tabulate_results(results)
+println(plot_parameter_trace(results, 1))
+print_results(results, "out/arq/")
 
 ## MBP MCMC
 # results = BayesianWorkflows.run_mcmc_analysis(model, prior, y)
@@ -38,5 +39,5 @@ sample_interval = [0.0005, 0.02]
 # tabulate_results(results)
 
 ## single model workflow
-results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
-tabulate_results(results)
+# results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
+# tabulate_results(results)

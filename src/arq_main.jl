@@ -33,12 +33,12 @@ export tabulate_results
 export plot_parameter_trace, plot_parameter_marginal, plot_parameter_heatmap
 
 ## structs
-include("cmn_structs.jl")
+include("cmn/cmn_structs.jl")
 include("arq/arq_structs.jl")
 # length(x::ARQMCMCSample) = 1
 
 ## common functions, macro
-include("cmn.jl")
+include("cmn/cmn.jl")
 include("arq/arq_alg_cmn.jl")
 ## standard ARQ MCMC algorithm
 include("arq/arq_alg_std.jl")
@@ -47,9 +47,10 @@ include("arq/arq_alg_std.jl")
 ## data augmented ARQ MCMC algorithm
 # include("arq_alg_daug.jl")
 ## common functions, printing, etc
+include("cmn/utils.jl")
 include("arq/arq_utils.jl")
 ## visualisation tools
-include("viz_uc_cmn.jl")
+include("cmn/viz_uc_cmn.jl")
 include("arq/viz_uc_arq.jl")
 
 ## for internal use (called by public functions)

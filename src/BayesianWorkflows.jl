@@ -40,9 +40,9 @@ const C_DF_ALPHA = 1.002        # acceptance alpha
 df_adapt_period(steps::Int64) = Int64(floor(steps * C_DF_MCMC_ADAPT))
 
 ## common resources
-include("cmn_structs.jl")
-include("cmn.jl")
-include("cmn_hmm.jl")
+include("cmn/cmn_structs.jl")
+include("cmn/cmn.jl")
+include("cmn/cmn_hmm.jl")
 
 ## model interface
 include("models.jl")
@@ -58,7 +58,7 @@ include("arq.jl")
 ## printing, tabulation, visualisation
 include("utils.jl")
 include("tab.jl")
-include("viz_uc_cmn.jl")
+include("cmn/viz_uc_cmn.jl")
 include("viz_uc_hmm.jl")
 
 ## PH - replace this with julia Exceptions **
