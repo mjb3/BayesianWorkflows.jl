@@ -6,16 +6,16 @@ using .ARQMCMC
 
 ## - for direct access with internal model
 function run_arq_mcmc_analysis(model::HiddenMarkovModel, sample_interval::Array{Float64,1};
-    sample_offset::Array{Float64, 1} = (sample_interval / 2), sample_dispersal::Int64 = ARQMCMC.C_DF_ARQ_SR
+    sample_offset::Array{Float64, 1} = (sample_interval / 2)
     , sample_limit::Int64 = C_DF_ARQ_SL, n_chains::Int64 = ARQMCMC.C_DF_ARQ_MC, steps::Int64 = C_DF_MCMC_STEPS
-    , burnin::Int64 = df_adapt_period(steps), tgt_ar::Float64 = ARQMCMC.C_DF_ARQ_AR, np::Int64 = 200
-    , ess_crit = 0.3) #, sample_cache = Dict{Array{Int64, 1}, GridPoint}()
+    , adapt_period::Int64 = df_adapt_period(steps), tgt_ar::Float64 = ARQMCMC.C_DF_ARQ_AR, np::Int64 = 200
+    , ess_crit = 0.3) #, sample_cache = Dict{Array{Int64, 1}, GridPoint}(), sample_dispersal::Int64 = ARQMCMC.C_DF_ARQ_SR
 
     # sc::Dict{Array{Int64, 1}, ARQMCMC.GridPoint} = sample_cache
     mdl = ARQModel(get_log_pdf_fn(model, np; essc = ess_crit), sample_interval, sample_offset)
     pr::Array{Distributions.Distribution,1} = [model.prior]
     println("ARQ model initialised: ", model.name)
-    return ARQMCMC.run_arq_mcmc_analysis(mdl, pr; sample_dispersal=sample_dispersal, sample_limit=sample_limit, n_chains=n_chains, steps=steps, burnin=burnin, tgt_ar=tgt_ar)#, sample_cache=sc
+    return ARQMCMC.run_arq_mcmc_analysis(mdl, pr; sample_limit=sample_limit, n_chains=n_chains, steps=steps, burnin=adapt_period, tgt_ar=tgt_ar)#, sample_cache=sc
 end
 
 ## - for direct access with internal model
@@ -57,11 +57,11 @@ The Gelman-Rubin convergence diagnostic is computed automatically.
 - `sample_cache`        -- the underlying model likelihood cache - can be retained and reused for future analyses.
 """
 function run_arq_mcmc_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1}, sample_interval::Array{Float64,1};
-    sample_offset::Array{Float64, 1} = (sample_interval / 2), sample_dispersal::Int64 = ARQMCMC.C_DF_ARQ_SR
+    sample_offset::Array{Float64, 1} = (sample_interval / 2)
     , sample_limit::Int64 = ARQMCMC.C_DF_ARQ_SL, n_chains::Int64 = ARQMCMC.C_DF_ARQ_MC, steps::Int64 = C_DF_MCMC_STEPS
-    , burnin::Int64 = df_adapt_period(steps), tgt_ar::Float64 = ARQMCMC.C_DF_ARQ_AR, np::Int64 = 200
-    , ess_crit = 0.3)#, sample_cache = Dict{Array{Int64, 1}, GridPoint}()
+    , adapt_period::Int64 = df_adapt_period(steps), tgt_ar::Float64 = ARQMCMC.C_DF_ARQ_AR, np::Int64 = 200
+    , ess_crit = 0.3)#, sample_cache = Dict{Array{Int64, 1}, GridPoint}(), sample_dispersal::Int64 = ARQMCMC.C_DF_ARQ_SR
 
     hmm = get_private_model(model, prior, obs_data)
-    return run_arq_mcmc_analysis(hmm, sample_interval; sample_offset=sample_offset, sample_dispersal=sample_dispersal, sample_limit=sample_limit, n_chains=n_chains, steps=steps, burnin=burnin, tgt_ar=tgt_ar, np=np, ess_crit=ess_crit)#, sample_cache=sample_cache
+    return run_arq_mcmc_analysis(hmm, sample_interval; sample_offset=sample_offset, sample_limit=sample_limit, n_chains=n_chains, steps=steps, adapt_period=adapt_period, tgt_ar=tgt_ar, np=np, ess_crit=ess_crit)#, sample_cache=sample_cache
 end

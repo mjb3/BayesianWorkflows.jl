@@ -136,7 +136,7 @@ function generate_x0(model::HiddenMarkovModel, theta::Array{Float64, 1}, ntries 
     end
     ## ADD PROPER ERR HANDLING ***
     println("WARNING: having an issue generating a valid trajectory for ", theta)
-    return generate_x0(model, theta, false)
+    return generate_x0(model, theta, ntries)
 end
 
 """

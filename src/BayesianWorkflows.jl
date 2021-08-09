@@ -71,6 +71,13 @@ end
 function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1};
     primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_interval=nothing)
 
+    ## type conversion
+    get_type_vals(x) = [getfield(x, v) for v in fieldnames(typeof(x))]
+    function get_mcmc_sample(x)
+        xv = get_type_vals(x)
+        xv[1] = RejectionSample(get_type_vals(x.samples)...)
+        return MCMCSample(xv...)
+    end
     ## primary analysis (ibis)
     if primary == C_ALG_NM_SMC2
         ibis = run_smc2_analysis(model, prior, obs_data)
@@ -86,7 +93,7 @@ function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribu
         mcmc = run_mcmc_analysis(model, prior, obs_data)
     elseif validation == C_ALG_NM_ARQ
         mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval)
-        mcmc = mcmc.rej_sample
+        mcmc = get_mcmc_sample(mcmc.rej_sample)
     else
         mcmc = nothing
         msg = string("Validation algorithm '", validation, "' not recognised. Valid values are: ", (C_ALG_NM_MBPM, C_ALG_NM_ARQ))

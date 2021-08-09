@@ -15,7 +15,8 @@ function get_grid_point!(grid, theta_i::Array{Int64, 1}, model::LikelihoodModel,
         sampled = 0
         theta_val = get_theta_val(model, theta_i)
     end
-    pr =  model.prior(theta_val)
+    # pr = model.prior(theta_val)
+    pr = Distributions.logpdf(model.prior, theta_val)
     if pr == -Inf
         output = GridPoint(theta_val, -Inf, visited, sampled)
         return GridRequest(output, pr, false)

@@ -27,3 +27,4 @@ Manifest.toml
 
 # private stuff
 examples/thesis/*
+src/sandpit.jl

@@ -11,7 +11,6 @@ Contains the PDF (or estimate, or approximation of the target density - a functi
 """
 struct ARQModel{PFT<:Function}
     pdf::PFT
-    # parameter_range::Array{Float64, 2}
     sample_interval::Array{Float64,1}
     sample_offset::Array{Float64, 1}
 end
@@ -33,12 +32,12 @@ end
 # end
 
 ## for internal use only
-struct LikelihoodModel{PFT<:Function, PRT<:Function}
+struct LikelihoodModel{PFT<:Function, PRT<:Distributions.Distribution}
     pdf::PFT
     sample_interval::Array{Float64, 1}
     sample_offset::Array{Float64, 1}
     sample_limit::Int64
-    sample_dispersal::Int64
+    # sample_dispersal::Int64
     jitter::Float64
     prior::PRT
 end
@@ -117,7 +116,7 @@ struct ARQMCMCSample
     rej_sample::MCMCSample # CHG TO rej_sample
     sample_interval::Array{Float64,1}
     sample_limit::Int64
-    sample_dispersal::Int64
+    # sample_dispersal::Int64
     #     jitter::Float64
     fx::Array{Int64, 1}
     sample_cache::Dict{Array{Int64, 1}, GridPoint}

@@ -1,24 +1,24 @@
 ### common algorithm stuffs
 
 ## new default prior: partially unbounded
-function get_df_arq_prior()
-    function arq_prior(theta::Array{Float64,1})
-        for i in eachindex(theta)
-            theta[i] < 0.0 && return -Inf
-        #     theta[i] > theta_range[i, 2] && return -Inf
-        end
-        return 0.0
-    end
-    return arq_prior
-end
-
-## new prior functions
-function get_arq_prior(priord::Distributions.Distribution)
-    function arq_prior(theta::Array{Float64,1})
-        return Distributions.logpdf(priord, theta)
-    end
-    return arq_prior
-end
+# function get_df_arq_prior()
+#     function arq_prior(theta::Array{Float64,1})
+#         for i in eachindex(theta)
+#             theta[i] < 0.0 && return -Inf
+#         #     theta[i] > theta_range[i, 2] && return -Inf
+#         end
+#         return 0.0
+#     end
+#     return arq_prior
+# end
+#
+# ## new prior functions
+# function get_arq_prior(priord::Distributions.Distribution)
+#     function arq_prior(theta::Array{Float64,1})
+#         return Distributions.logpdf(priord, theta)
+#     end
+#     return arq_prior
+# end
 
 ## realise theta index as sample value
 function get_theta_val(model::LikelihoodModel, theta::Array{Int64, 1})
@@ -45,7 +45,8 @@ function get_theta_f(theta_i::Array{Int64, 1}, j_w::StatsBase.ProbabilityWeights
 end
 
 ## inner alg constants:
-const Q_JUMP = 0.1              # initial = Q_JUMP * grid res * NP
+# const Q_JUMP = 0.1            # initial = Q_JUMP * grid res * NP
+const Q_JUMP = 5.0              # initial = Q_JUMP * grid res * NP
 const Q_J_MIN = 2
 const N_ADAPT_PERIODS = 100     # adaptive mh mcmc (parameterise?)
 const C_DF_ARQ_CJ = 10          # contingency jumps
@@ -96,13 +97,25 @@ end
 
 ## get intial parameter index and 'grid' sample - returns tuple(index, GridRequest)
 # NB. update for offsets ********
-function get_initial_sample(mdl::LikelihoodModel, grid::Dict{Array{Int64, 1}, GridPoint}, mc_fx::Array{Int64, 1}, sample_dispersal::Int64 = mdl.sample_dispersal)
-    theta_i = rand(1:sample_dispersal, length(mdl.sample_interval))     # choose initial theta coords
-    x0 = get_grid_point!(grid, theta_i, mdl, true)
-    x0.prior == -Inf && (return get_initial_sample(mdl, grid, mc_fx, sample_dispersal + 1))
+# function get_initial_sample(mdl::LikelihoodModel, grid::Dict{Array{Int64, 1}, GridPoint}, mc_fx::Array{Int64, 1}, sample_dispersal::Int64 = mdl.sample_dispersal)
+#     theta_i = rand(1:sample_dispersal, length(mdl.sample_interval))     # choose initial theta coords
+#     x0 = get_grid_point!(grid, theta_i, mdl, true)
+#     x0.prior == -Inf && (return get_initial_sample(mdl, grid, mc_fx, sample_dispersal + 1))
+#     x0.process_run && (mc_fx[1] += 1)
+#     (C_DEBUG && sample_dispersal > mdl.sample_dispersal) && print(" *ISA: ", sample_dispersal - mdl.sample_dispersal, "*")
+#     return (theta_i, x0)
+# end
+
+## UPDATED: get intial parameter index and 'grid' sample - returns tuple(index, GridRequest)
+function get_initial_sample(mdl::LikelihoodModel, grid::Dict{Array{Int64, 1}, GridPoint}, mc_fx::Array{Int64, 1})#, sample_dispersal::Int64 = mdl.sample_dispersal
+    theta_init = rand(mdl.prior)
+    tmp = round.(theta_init ./ mdl.sample_interval)
+    theta_idx = zeros(Int64, length(tmp))
+    theta_idx .= tmp
+    x0 = get_grid_point!(grid, theta_idx, mdl, true)
+    x0.prior == -Inf && (return get_initial_sample(mdl, grid, mc_fx))
     x0.process_run && (mc_fx[1] += 1)
-    (C_DEBUG && sample_dispersal > mdl.sample_dispersal) && print(" *ISA: ", sample_dispersal - mdl.sample_dispersal, "*")
-    return (theta_i, x0)
+    return (theta_idx, x0)
 end
 
 ## initialise inner ARQ MCMC
@@ -114,10 +127,13 @@ macro init_inner_mcmc()
       xi = x0[2]
       C_DEBUG && print(": θ ~ ", round.(xi.result.sample; sigdigits = C_PR_SIGDIG + 1))
       ## adaptive stuff
-      C_LAR_J_MP = 0.2                                # low AR contingency values
-      lar_j::Int64 = round(C_LAR_J_MP * model.sample_dispersal * length(theta_i))
+      # C_LAR_J_MP = 0.2                                # low AR contingency values
+      # lar_j::Int64 = round(C_LAR_J_MP * model.sample_dispersal * length(theta_i))
+      C_LAR_J_MP = 10.0                                # low AR contingency values
+      lar_j::Int64 = round(C_LAR_J_MP * length(theta_i))
       a_h::Int64 = max(steps / N_ADAPT_PERIODS, 100)    # interval
-      j::Int64 = round(Q_JUMP * model.sample_dispersal * length(theta_i))
+      # j::Int64 = round(Q_JUMP * model.sample_dispersal * length(theta_i))
+      j::Int64 = round(Q_JUMP * length(theta_i))
       j_w = StatsBase.ProbabilityWeights(ones(length(theta_i)))
 
       ## declare results
