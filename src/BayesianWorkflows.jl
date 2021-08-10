@@ -92,6 +92,7 @@ function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribu
     if validation == C_ALG_NM_MBPM
         mcmc = run_mcmc_analysis(model, prior, obs_data)
     elseif validation == C_ALG_NM_ARQ
+        @assert typeof(sample_interval) == Array{Float, 1}
         mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval)
         mcmc = get_mcmc_sample(mcmc.rej_sample)
     else
@@ -103,8 +104,19 @@ function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribu
     return SingleModelResults(model, ibis, mcmc)
 end
 # - multi model
-function run_inference_workflow(models::Array{DPOMPModel}, prior::Array{Distributions.Distribution}, obs_data::Array{Observation,1})
+function run_inference_workflow(models::Array{DPOMPModel}, priors::Array{Distributions.Distribution}, obs_data::Array{Observation,1};
+    primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_intervals=nothing)
 
+    ## collect individual results
+    output = []
+    for i in eachindex(models)
+        si = sample_intervals==nothing ? nothing : si[i]
+        r = run_inference_workflow(models[i], priors[i], obs_data;
+            primary=primary, validation=validation, sample_interval=si)
+        push!(output, r)
+    end
+    ## NB. add struct?
+    return output
 end
 # - multi prior
 
