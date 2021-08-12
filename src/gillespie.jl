@@ -129,14 +129,15 @@ end
 #### #### #### #### #### #### ####
 
 ## for inference
-function generate_x0(model::HiddenMarkovModel, theta::Array{Float64, 1}, ntries = 10000)
+function generate_x0(model::HiddenMarkovModel, ntries = 10000)#, theta::Array{Float64, 1}
+    theta = rand(model.prior)
     for i in 1:ntries
         x0 = gillespie_sim(model, theta, false).particle
         x0.log_like[1] != -Inf && return x0
     end
     ## ADD PROPER ERR HANDLING ***
-    println("WARNING: having an issue generating a valid trajectory for ", theta)
-    return generate_x0(model, theta, ntries)
+    println("WARNING: having an issue generating a valid initial trajectory\n- parameters: ", theta)
+    return generate_x0(model, ntries)
 end
 
 """

@@ -1,7 +1,7 @@
 #### data-augmented MCMC
 
 ## helpers
-sample_space(theta_init::Array{Float64,2}, steps::Int64) = zeros(size(theta_init,1), steps, size(theta_init,2))
+# sample_space(theta_init::Array{Float64,2}, steps::Int64) = zeros(size(theta_init,1), steps, size(theta_init,2))
 
 ## initialise mcmc algorithm
 const C_INITIAL = 0.1     # initial proposal scalar
@@ -166,20 +166,21 @@ function gibbs_mh_alg!(theta::Array{Float64,3}, mc::Int64, model::HiddenMarkovMo
 end
 
 ## standard DA-MCMC
-function run_std_mcmc(model::HiddenMarkovModel, theta_init::Array{Float64,2}, steps::Int64, adapt_period::Int64, fin_adapt::Bool, ppp::Float64, mvp::Int64)
-    function x0_prop(theta::Array{Float64,1})
-        x0 = generate_x0(model, theta)         # simulate initial particle
+function run_std_mcmc(model::HiddenMarkovModel, theta_n::Int64, steps::Int64, adapt_period::Int64, fin_adapt::Bool, ppp::Float64, mvp::Int64)
+    function x0_prop()
+        x0 = generate_x0(model)         # simulate initial particle
         compute_full_log_like!(model, x0)           # NB. sim initialises with OM ll only
         return x0
     end
     trajectory_prop =  get_std_mcmc_proposal_fn(model, mvp)
     adapt_tp = get_std_mcmc_proposal_fn(model, 2)
-    println("Running: ", size(theta_init, 2) ,"-chain ", steps, "-sample ", fin_adapt ? "finite-" : "", "adaptive DA-MCMC analysis (model: ", model.name, ")")
+    println("Running: ", n_chains, "-chain ", steps, "-sample ", fin_adapt ? "finite-" : "", "adaptive DA-MCMC analysis (model: ", model.name, ")")
     start_time = time_ns()
-    samples = sample_space(theta_init, steps)
-    for i in 1:size(theta_init,2)
+    # samples = sample_space(theta_init, steps)
+    samples = zeros(theta_n, steps, n_chains)
+    for i in 1:n_chains
         print(" initialising chain ", i)
-        x0 = x0_prop(theta_init[:,i])
+        x0 = x0_prop()
         ## run inference
         C_DEBUG && print(" with x0 := ", x0.theta, " (", length(x0.trajectory), " events)")
         a_cnt = gibbs_mh_alg!(samples, i, model, adapt_period, x0, trajectory_prop, fin_adapt, ppp, adapt_tp)
@@ -190,14 +191,15 @@ function run_std_mcmc(model::HiddenMarkovModel, theta_init::Array{Float64,2}, st
 end
 
 ## MBP MCMC
-function run_mbp_mcmc(model::HiddenMarkovModel, theta_init::Array{Float64,2}, steps::Int64, adapt_period::Int64, fin_adapt::Bool)
+function run_mbp_mcmc(model::HiddenMarkovModel, n_chains::Int64, steps::Int64, adapt_period::Int64, fin_adapt::Bool)
+    theta_n = length(rand(model.prior)) # hacky...
     start_time = time_ns()
-    # samples = zeros(size(theta_init,1), steps, size(theta_init,2))
-    samples = sample_space(theta_init, steps)
-    println("Running: ", size(theta_init, 2) ,"-chain ", steps, "-sample ", fin_adapt ? "finite-" : "", "adaptive MBP-MCMC analysis (model: ", model.name, ")")
-    for i in 1:size(theta_init,2)
+    # samples = sample_space(theta_init, steps)
+    samples = zeros(theta_n, steps, n_chains)
+    println("Running: ", n_chains, "-chain ", steps, "-sample ", fin_adapt ? "finite-" : "", "adaptive MBP-MCMC analysis (model: ", model.name, ")")
+    for i in 1:n_chains
         print(" initialising chain ", i)
-        x0 = generate_x0(model, theta_init[:,i])    # simulate initial particle
+        x0 = generate_x0(model)    # simulate initial particle
         ## run inference
         C_DEBUG && print( " with x0 := ", x0.theta, " (", length(x0.trajectory), " events)")
         a_cnt = met_hastings_alg!(samples, i, model, adapt_period, x0, model_based_proposal, fin_adapt)

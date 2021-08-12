@@ -34,14 +34,15 @@ tabulate_results(results)                   # optionally, show the results
 
 """
 function run_mcmc_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1};
-    n_chains::Int64 = 3, initial_parameters = rand(prior, n_chains), steps::Int64 = C_DF_MCMC_STEPS,
+    n_chains::Int64 = 3, steps::Int64 = C_DF_MCMC_STEPS,
     adapt_period::Int64 = Int64(floor(steps * C_DF_MCMC_ADAPT)), fin_adapt::Bool = false,
     mbp::Bool = true, ppp::Float64 = 0.3, mvp::Int64 = 3)
+    #, initial_parameters = rand(prior, n_chains)
 
     mdl = get_private_model(model, prior, obs_data)
     if mbp
-        return run_mbp_mcmc(mdl, initial_parameters, steps, adapt_period, fin_adapt)
+        return run_mbp_mcmc(mdl, n_chains, steps, adapt_period, fin_adapt)
     else
-        return run_std_mcmc(mdl, initial_parameters, steps, adapt_period, fin_adapt, ppp, mvp)
+        return run_std_mcmc(mdl, n_chains, steps, adapt_period, fin_adapt, ppp, mvp)
     end
 end
