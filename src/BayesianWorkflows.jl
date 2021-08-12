@@ -92,7 +92,7 @@ function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribu
     if validation == C_ALG_NM_MBPM
         mcmc = run_mcmc_analysis(model, prior, obs_data)
     elseif validation == C_ALG_NM_ARQ
-        @assert typeof(sample_interval) == Array{Float, 1}
+        @assert typeof(sample_interval) == Array{Float64, 1}
         mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval)
         mcmc = get_mcmc_sample(mcmc.rej_sample)
     else
@@ -120,8 +120,10 @@ function run_inference_workflow(models::Array{DPOMPModel}, priors::Array{Distrib
 end
 # - multi prior
 
-## public functions
+## public functions and types
+export DPOMPModel
 export generate_model
+export partial_gaussian_obs_model
 export gillespie_sim
 export get_observations
 export tabulate_results, print_results

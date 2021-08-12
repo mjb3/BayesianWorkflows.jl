@@ -18,6 +18,7 @@ function get_model()
     INFECTIOUS = 3
     RECOVERED = 4
     DEATH = 5
+    OBS_STATES = [INFECTIOUS, DEATH]
     # - model parameters
     T_ZERO = 0  # I.E. NO INITIAL INFECTION TIME PARAMETER (ASSUME t0=0.0)
     CONTACT = 1
@@ -39,15 +40,14 @@ function get_model()
     # - observation function
     function obs_fn!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Array{Float64,1})
         di = Distributions.Binomial(population[INFECTIOUS], PROB_DETECTION_I)
-        dd = Distributions.Binomial(population[MORTALITY], PROB_DETECTION_I)
-        y.val[INFECTIOUS] = rand(di)
-        y.val[MORTALITY] = rand(dd)
+        dd = Distributions.Binomial(population[DEATH], PROB_DETECTION_I)
+        y.val[OBS_STATES] .= [rand(di), rand(dd)]
     end
-    # - observation model (to be replaced with custom example NB. count MORTALITY!!!)
+    # - observation model
     # obs_model = BayesianWorkflows.partial_gaussian_obs_model(2.0; seq = 3)
     function obs_model(y::BayesianWorkflows.Observation, population::Array{Int64,1}, theta::Array{Float64,1})
-        d = Distributions.Binomial.([population[INFECTIOUS], population[MORTALITY]], [PROB_DETECTION_I, PROB_DETECTION_D])
-        return Distributions.logpdf(Distributions.Product(d), [y.val[INFECTIOUS], y.val[MORTALITY]])
+        d = Distributions.Binomial.(population[OBS_STATES], [PROB_DETECTION_I, PROB_DETECTION_D])
+        return Distributions.logpdf(Distributions.Product(d), y.val[OBS_STATES])
     end
     # - construct model and return
     return BayesianWorkflows.DPOMPModel(MODEL_NAME, N_EVENT_TYPES, seird_rf, fnic, fnt, obs_model, obs_fn!, T_ZERO)

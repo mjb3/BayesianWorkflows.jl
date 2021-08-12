@@ -19,8 +19,27 @@ prior = Distributions.Product(Distributions.Uniform.(zeros(2), [0.01, 0.5]))
 x = gillespie_sim(model, theta)	    # run simulation
 println(plot_trajectory(x))			# plot (optional)
 
+#### BAYESIAN INFERENCE WORKFLOWS ####
+sample_interval = [0.0005, 0.02]    # intervals used for ARQ algorithm
+
+## single model workflow
+results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
+tabulate_results(results)
+
+## model comparison workflow
+# define alternative model
+seis_model = generate_model("SEIS", [100, 0, 1])
+seis_model.obs_model = partial_gaussian_obs_model(2.0, seq = 3, y_seq = 2)
+seis_prior = Distributions.Product(Distributions.Uniform.(zeros(3), [0.1,0.5,0.5]))
+# run workflow - WORK IN PROGRESS
+# models = [model, seis_model]
+# priors = [prior, seis_prior]
+# results = run_inference_workflow(models, priors, y)
+# tabulate_results(results)
+
+#### INDIVIDUAL ALGORITHM CALLS ####
+
 ## ARQMCMC
-sample_interval = [0.0005, 0.02]
 # results = BayesianWorkflows.run_arq_mcmc_analysis(model, prior, y, sample_interval)
 # tabulate_results(results)
 # println(plot_parameter_trace(results, 1))
@@ -37,18 +56,3 @@ sample_interval = [0.0005, 0.02]
 ## SMC^2
 # results = BayesianWorkflows.run_smc2_analysis(model, prior, y)
 # tabulate_results(results)
-
-## single model workflow
-results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
-tabulate_results(results)
-
-## model comparison workflow
-# define alternative model
-seis_model = generate_model("SEIS", [100, 0, 1])
-seis_model.obs_model = partial_gaussian_obs_model(2.0, seq = 3, y_seq = 2)
-seis_prior = Distributions.Product(Distributions.Uniform.(zeros(3), [0.1,0.5,0.5]))
-# run workflow
-models = [model, seis_model]
-priors = [prior, seis_prior]
-results = run_inference_workflow(models, priors, y)
-tabulate_results(results)
