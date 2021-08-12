@@ -9,16 +9,16 @@ Random.seed!(0)
 function get_model()
     MODEL_NAME = "SEIRD"
     N_EVENT_TYPES = 4
-    # - observation probabilities
-    PROB_DETECTION_I = 0.6
-    PROB_DETECTION_D = 0.95
     # - discrete state space
     SUSCEPTIBLE = 1
     EXPOSED = 2
     INFECTIOUS = 3
     RECOVERED = 4
     DEATH = 5
-    OBS_STATES = [INFECTIOUS, DEATH]
+    OBSERVED_STATES = [INFECTIOUS, DEATH]
+    # - observation probabilities
+    PROB_DETECTION_I = 0.6
+    PROB_DETECTION_D = 0.95
     # - model parameters
     T_ZERO = 0  # I.E. NO INITIAL INFECTION TIME PARAMETER (ASSUME t0=0.0)
     CONTACT = 1
@@ -46,8 +46,8 @@ function get_model()
     # - observation model
     # obs_model = BayesianWorkflows.partial_gaussian_obs_model(2.0; seq = 3)
     function obs_model(y::BayesianWorkflows.Observation, population::Array{Int64,1}, theta::Array{Float64,1})
-        d = Distributions.Binomial.(population[OBS_STATES], [PROB_DETECTION_I, PROB_DETECTION_D])
-        return Distributions.logpdf(Distributions.Product(d), y.val[OBS_STATES])
+        d = Distributions.Binomial.(population[OBSERVED_STATES], [PROB_DETECTION_I, PROB_DETECTION_D])
+        return Distributions.logpdf(Distributions.Product(d), y.val[OBSERVED_STATES])
     end
     # - construct model and return
     return BayesianWorkflows.DPOMPModel(MODEL_NAME, N_EVENT_TYPES, seird_rf, fnic, fnt, obs_model, obs_fn!, T_ZERO)
