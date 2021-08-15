@@ -57,7 +57,6 @@ run_model_comparison_analysis
 get_observations
 tabulate_results
 save_to_file
-get_particle_filter_lpdf
 ```
 
 ### Visualisation

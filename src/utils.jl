@@ -57,7 +57,7 @@ include("cmn/utils.jl")
 Print the results of an inference analysis to file.
 """
 ## print importance sample results
-function print_results(results::ImportanceSample, dpath::String)
+function save_to_file(results::ImportanceSample, dpath::String)
     # check dir
     isdir(dpath) || mkpath(dpath)
     # print metadata
@@ -69,12 +69,12 @@ function print_results(results::ImportanceSample, dpath::String)
 end
 
 ## print arq mcmc results
-function print_results(results::ARQMCMCSample, dpath::String)
+function save_to_file(results::ARQMCMCSample, dpath::String)
     ARQMCMC.save_to_file(results, dpath)
 end
 
 ## print MCMC sample
-function print_results(results::MCMCSample, dpath::String)
+function save_to_file(results::MCMCSample, dpath::String)
     # check dir
     isdir(dpath) || mkpath(dpath)
     # print metadata

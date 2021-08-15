@@ -43,7 +43,7 @@ seis_prior = Distributions.Product(Distributions.Uniform.(zeros(3), [0.1,0.5,0.5
 # results = BayesianWorkflows.run_arq_mcmc_analysis(model, prior, y, sample_interval)
 # tabulate_results(results)
 # println(plot_parameter_trace(results, 1))
-# print_results(results, "out/arq/")
+# save_to_file(results, "out/arq/")
 
 ## MBP MCMC
 # results = BayesianWorkflows.run_mcmc_analysis(model, prior, y)
