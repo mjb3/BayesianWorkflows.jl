@@ -123,6 +123,7 @@ end
 ## public functions and types
 export DPOMPModel, Particle, Event, Observation
 export SimResults, ImportanceSample, RejectionSample, MCMCSample
+export ARQModel
 export generate_model
 export partial_gaussian_obs_model
 export gillespie_sim

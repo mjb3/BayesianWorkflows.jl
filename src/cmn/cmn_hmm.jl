@@ -61,7 +61,7 @@ function save_to_file(results::SimResults, dpath::String)
         # print headers
         write(f, "time, event")
         for p in 1:size(results.population, 2)
-            write(f, ",$p")
+            write(f, ",val$p")
         end
         # print event sequence
         for i in eachindex(results.particle.trajectory)
