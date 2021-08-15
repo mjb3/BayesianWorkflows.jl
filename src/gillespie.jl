@@ -44,11 +44,12 @@ end
 ## generate 'blank' observations for sim
 # HACK: need to replace C_DEFAULT_OBS_PROP with [optional] random number at some point... **
 C_DEFAULT_OBS_PROP = 1.0
-function generate_observations(tmax::Float64, num_obs::Int64, n_states::Int64)
+function generate_observations(tmax::Float64, num_obs::Int64, n_states::Int64, n_test_types::Int64)
     obs = Observation[]
     t = collect(tmax / num_obs : tmax / num_obs : tmax)
     for i in eachindex(t)
-        push!(obs, Observation(t[i], 1, C_DEFAULT_OBS_PROP, zeros(Int64, n_states)))
+        test_type = rand(1:n_test_types)
+        push!(obs, Observation(t[i], test_type, C_DEFAULT_OBS_PROP, zeros(Int64, n_states)))
     end
     return obs
 end
@@ -164,8 +165,8 @@ println(DiscretePOMP.plot_trajectory(x))
 ```
 
 """
-function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::Float64 = 100.0, num_obs::Int64 = 5, n_sims::Int64 = 1)
-    y = generate_observations(tmax, num_obs, get_pop_size(model))
+function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::Float64 = 100.0, num_obs::Int64 = 5, n_sims::Int64 = 1, n_test_types::Int64=1)
+    y = generate_observations(tmax, num_obs, get_pop_size(model), n_test_types)
     mdl = get_private_model(model, generate_weak_prior(length(parameters)), y)
     if n_sims == 1
         print("Running: ", model.name, " DGA for θ := ", parameters)
@@ -176,7 +177,7 @@ function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::F
         print("Running: ", model.name, " DGA for θ := ", parameters, " x ", n_sims)
         output = Array{SimResult,1}(undef, n_sims)
         for i in eachindex(output)
-            y = generate_observations(tmax, num_obs, get_pop_size(model))
+            y = generate_observations(tmax, num_obs, get_pop_size(model), n_test_types)
             output[i] = gillespie_sim(mdl, parameters, true)
         end
         println(" - finished.")

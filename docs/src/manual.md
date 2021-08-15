@@ -40,9 +40,18 @@ gillespie_sim
 
 ### Bayesian inference
 
+#### Workflows
+
 ```@docs
+run_inference_workflow
+```
+
+#### Algorithms
+
+```@docs
+run_smc2_analysis
+run_mbp_ibis_analysis
 run_mcmc_analysis
-run_ibis_analysis
 run_arq_mcmc_analysis
 ```
 
