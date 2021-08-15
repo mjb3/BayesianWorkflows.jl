@@ -123,7 +123,7 @@ end
 ## public functions and types
 export DPOMPModel, Particle, Event, Observation
 export SimResults, ImportanceSample, RejectionSample, MCMCSample
-export ARQModel
+export ARQModel, ARQMCMCSample
 export generate_model
 export partial_gaussian_obs_model
 export gillespie_sim
@@ -131,5 +131,6 @@ export get_observations
 export tabulate_results, save_to_file
 export plot_trajectory, plot_parameter_trace, plot_parameter_heatmap, plot_model_comparison
 export run_inference_workflow
+export run_smc2_analysis, run_mcmc_analysis, run_mbp_ibis_analysis, run_arq_mcmc_analysis
 
 end # module

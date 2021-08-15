@@ -76,14 +76,14 @@ function save_to_file(results::SimResults, dpath::String)
     # print observation
     open(string(dpath, "obs.csv"), "w") do f
         # print headers
-        write(f, "time,id")
+        write(f, "time,id,prop")
         for p in eachindex(results.observations[1].val)
             # c = model.name[p]
-            write(f, ",$p")
+            write(f, ",val$p")
         end
         # print event sequence
         for i in eachindex(results.observations)
-            write(f, "\n$(results.observations[i].time),$(results.observations[i].obs_id)")
+            write(f, "\n$(results.observations[i].time),$(results.observations[i].obs_id),$(results.observations[i].prop)")
             tp = results.observations[i].val
             for p in eachindex(tp)
                 write(f, ",$(tp[p])")
