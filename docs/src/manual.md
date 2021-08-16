@@ -12,7 +12,6 @@ DPOMPModel
 Particle
 Event
 Observation
-ARQModel
 ```
 
 ### Results

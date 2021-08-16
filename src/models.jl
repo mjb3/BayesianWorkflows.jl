@@ -22,7 +22,7 @@ end
 
 ## uninformative prior distribution generator
 """
-    generate_weak_prior(n)
+    generate_uniform_prior(n)
 
 **Parameters**
 
@@ -31,11 +31,11 @@ end
 
 # Examples
 
-    generate_weak_prior(1)
+    generate_uniform_prior(1)
 
 Generate a "weak" prior distribution, Uniform multivariate ~ U(0, max) for dim = n,  where `n` is the number of parameters in the model.
 """
-function generate_weak_prior(n::Int, b::Float64 = 1.0)
+function generate_uniform_prior(n::Int, b::Float64 = 1.0)
     return Distributions.Product(Distributions.Uniform.(zeros(n), b))
 end
 
@@ -212,16 +212,15 @@ function generate_model(model_name::String, initial_condition::Array{Int64, 1}; 
         println(" - SORRY: model name '", model_name, "' not recognised.")
         return  # handle this better? ***
     end
-
     ## TEMP - TO BE UPDATED ****************
     fn_ic() = initial_condition
     fn_trans! = generate_trans_fn(m_transition)
-
     ## return model
     return DPOMPModel(model_name, size(m_transition, 1), rate_fn, fn_ic, fn_trans!, obs_model, dmy_obs_fn, t0_index)
 end
 
 
+## THIS IS DEPRECATED
 """
     generate_custom_model(model_name, rate_function, initial_condition, m_transition; ... )
 

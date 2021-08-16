@@ -8,12 +8,14 @@ include("cmn_struct_hmm.jl")
 A `mutable struct` which represents a DSSCT model (see [Models](@ref) for further details).
 
 **Fields**
-- `model_name`          -- string, e,g, `"SIR"`.
+- `name`                -- string, e,g, `"SIR"`.
+- `n_events`            -- number of distinct event types.
 - `rate_function`       -- event rate function.
+- `fn_initial_state`    -- function for sampling initial model state.
 - `initial_condition`   -- initial condition.
 - `m_transition`        -- transition matrix.
 - `obs_model`           -- observation model likelihood function.
-- `obs_function         -- observation function, use this to add 'noise' to simulated observations.
+- `obs_function`        -- observation function, use this to add 'noise' to simulated observations.
 - `t0_index`            -- index of the parameter that represents the initial time. `0` if fixed at `0.0`.
 
 """
