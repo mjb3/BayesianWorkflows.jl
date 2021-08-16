@@ -167,7 +167,7 @@ println(DiscretePOMP.plot_trajectory(x))
 """
 function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::Float64 = 100.0, num_obs::Int64 = 5, n_sims::Int64 = 1, n_test_types::Int64=1)
     y = generate_observations(tmax, num_obs, get_pop_size(model), n_test_types)
-    mdl = get_private_model(model, generate_weak_prior(length(parameters)), y)
+    mdl = get_private_model(model, generate_uniform_prior(length(parameters)), y)
     if n_sims == 1
         print("Running: ", model.name, " DGA for θ := ", parameters)
         output = gillespie_sim(mdl, parameters, true)
