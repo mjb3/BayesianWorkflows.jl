@@ -48,7 +48,7 @@
 include("cmn/utils.jl")
 
 """
-    print_results
+    save_to_file
 
 **Parameters**
 - `samples`     -- a data structure of type `MCMCSample`, `ImportanceSample` or `ARQMCMCSample`.
