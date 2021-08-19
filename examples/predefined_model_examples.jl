@@ -27,15 +27,19 @@ results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C
 tabulate_results(results)
 
 ## model comparison workflow
-# define alternative model
-seis_model = generate_model("SEIS", [100, 0, 1])
-seis_model.obs_model = partial_gaussian_obs_model(2.0, seq = 3, y_seq = 2)
-seis_prior = Distributions.Product(Distributions.Uniform.(zeros(3), [0.1,0.5,0.5]))
-# run workflow - WORK IN PROGRESS
-# models = [model, seis_model]
-# priors = [prior, seis_prior]
-# results = run_inference_workflow(models, priors, y)
-# tabulate_results(results)
+function run_model_comp()
+    # define alternative model
+    seis_model = generate_model("SEIS", [100, 0, 1])
+    seis_model.obs_model = partial_gaussian_obs_model(2.0, seq = 3, y_seq = 2)
+    seis_prior = Distributions.Product(Distributions.Uniform.(zeros(3), [0.1,0.5,0.5]))
+    # run workflow - WORK IN PROGRESS
+    models::Array{DPOMPModel, 1} = [model, seis_model]
+    priors::Array{Distributions.Distribution, 1} = [prior, seis_prior]
+    println(typeof(models), " -- ", typeof(priors))
+    results = run_inference_workflow(models, priors, y)
+    tabulate_results(results)
+end
+run_model_comp()
 
 #### INDIVIDUAL ALGORITHM CALLS ####
 

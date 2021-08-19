@@ -115,6 +115,11 @@ struct SingleModelResults
     mcmc::MCMCSample
 end
 
+## ADD DOCS
+# struct MultiModelResults
+#     results::Array{SingleModelResults, 1}
+# end
+
 """
     ModelComparisonResults
 

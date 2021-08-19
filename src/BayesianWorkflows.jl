@@ -104,11 +104,14 @@ function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribu
     return SingleModelResults(model, ibis, mcmc)
 end
 # - multi model
-function run_inference_workflow(models::Array{DPOMPModel}, priors::Array{Distributions.Distribution}, obs_data::Array{Observation,1};
+function run_inference_workflow(models::Array{DPOMPModel,1}, priors::Array{Distributions.Distribution,1}, obs_data::Array{Observation,1};
     primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_intervals=nothing)
 
+    ## check values
+    @assert length(models) == length(priors)
+
     ## collect individual results
-    output = []
+    output::Array{SingleModelResults, 1} = []
     for i in eachindex(models)
         si = sample_intervals==nothing ? nothing : si[i]
         r = run_inference_workflow(models[i], priors[i], obs_data;
@@ -118,7 +121,42 @@ function run_inference_workflow(models::Array{DPOMPModel}, priors::Array{Distrib
     ## NB. add struct?
     return output
 end
-# - multi prior
+
+## for model comparison
+function compute_bayes_factor(ml::Array{Float64,1}, null_index::Int64)
+    output = exp.(-ml)
+    output ./= output[1]
+    return output
+end
+
+## model evidence comparison
+# - TBA: include parameter estimates **
+function tabulate_results(results::Array{SingleModelResults, 1}; null_index = 1)
+    h = ["Model", string("ln E[p(y)]"), ":σ", "BF"]
+    d = Matrix(undef, length(results), length(h))
+    d[:,1] .= [r.model.name for r in results]
+    d[:,2] .= [r.model.name for r in results]
+    d[:,3] .= [r.model.name for r in results]
+    d[:,4] .= [r.model.name for r in results]
+end
+# function tabulate_results(results::ModelComparisonResults; null_index = 1)
+#     h = ["Model", string("ln E[p(y)]"), ":σ", "BF"]   # ADD THETA ******************
+#     d = Matrix(undef, length(results.mu), length(h))
+#     d[:,1] .= results.names
+#     d[:,2] .= round.(results.mu; digits = 1)
+#     d[:,3] .= round.(results.sigma; sigdigits = C_PR_SIGDIG)
+#     d[:,4] .= round.(compute_bayes_factor(results.mu, null_index); digits = 1)
+#     PrettyTables.pretty_table(d, h)
+# end
+
+
+# - multi prior (ARQ only)
+function run_inference_workflow(model::DPOMPModel, priors::Array{Distributions.Distribution}, obs_data::Array{Observation,1}, sample_interval::Array{Float64,1})
+    println("multiple prior workflow is a WIP!")
+    for i in eachindex(priors)
+        # mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval)
+    end
+end
 
 ## public functions and types
 export DPOMPModel, Particle, Event, Observation
