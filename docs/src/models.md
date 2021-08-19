@@ -30,3 +30,9 @@ Aside from the model name and initial model state (i.e. the initial 'population'
 1. `freq_dep`    -- epidemiological models only, set to `true` for frequency-dependent contact rates.
 1. `obs_error`   -- average observation error (default = 2.)
 1. `t0_index`    -- index of the parameter that represents the initial time. `0` if fixed at `0.0`.
+
+## Full model configuration
+
+```@docs
+DPOMPModel
+```
