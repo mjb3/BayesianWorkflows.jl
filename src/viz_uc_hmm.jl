@@ -123,7 +123,7 @@ end
 ## model evidence comparison
 #- `boxplot`   -- `true` for a series of boxplots, else a simple UnicodePlots.barplot showing only the average BME for each model variant (default.)
 """
-    plot_model_comparison(results; boxplot = true)
+    plot_model_comparison(results)
 
 Plot the Bayesian model evidence (BME) from a [multi-] model inference workflow, using [UnicodePlots.jl](https://github.com/Evizero/UnicodePlots.jl).
 
@@ -131,7 +131,7 @@ Plot the Bayesian model evidence (BME) from a [multi-] model inference workflow,
 - `results`   -- `ModelComparisonResults`, i.e. from a call to `run_model_comparison_analysis`.
 
 """
-function plot_model_comparison(results::::Array{SingleModelResults, 1})
+function plot_model_comparison(results::Array{SingleModelResults, 1})
     c_plot_title = "Estimated model [log] evidence"
     # this is a HACK - need to handle bad results better...
     try

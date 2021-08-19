@@ -9,13 +9,14 @@ Random.seed!(1)
 theta = [0.003, 0.1]
 initial_condition = [100, 1]
 data_fp = "data/pooley.csv"
+y = get_observations(data_fp)
 
-## getting started
-y = get_observations(data_fp) # val_seq=2:3
+## generate a model
 model = generate_model("SIS", initial_condition)
 prior = Distributions.Product(Distributions.Uniform.(zeros(2), [0.01, 0.5]))
 
 ## simulation # NB. first define the SIS 'model' variable, per above
+println("-- RUNNING MODEL SIMULATION --")
 x = gillespie_sim(model, theta)	    # run simulation
 println(plot_trajectory(x))			# plot (optional)
 
@@ -23,11 +24,15 @@ println(plot_trajectory(x))			# plot (optional)
 sample_interval = [0.0005, 0.02]    # intervals used for ARQ algorithm
 
 ## single model workflow
-results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
-tabulate_results(results)
+function parameter_inference_example()
+    println("\n-- RUNNING SINGLE-MODEL INFERENCE WORKFLOW --")
+    results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
+    tabulate_results(results)
+end
 
 ## model comparison workflow
-function run_model_comp()
+function model_comparison_example()
+    println("\n-- RUNNING MULTI-MODEL INFERENCE WORKFLOW --")
     # define alternative model
     seis_model = generate_model("SEIS", [100, 0, 1])
     seis_model.obs_model = partial_gaussian_obs_model(2.0, seq = 3, y_seq = 2)
@@ -38,7 +43,10 @@ function run_model_comp()
     results = run_inference_workflow(models, priors, y)
     tabulate_results(results)
 end
-run_model_comp()
+
+## run examples:
+parameter_inference_example()
+model_comparison_example()
 
 #### INDIVIDUAL ALGORITHM CALLS ####
 

@@ -100,7 +100,7 @@ function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribu
         msg = string("Validation algorithm '", validation, "' not recognised. Valid values are: ", (C_ALG_NM_MBPM, C_ALG_NM_ARQ))
         throw(AlgorithmException(msg))
     end
-    println("- workflow complete.")
+    println("- single model workflow complete.")
     return SingleModelResults(model, ibis, mcmc)
 end
 # - multi model
@@ -118,6 +118,7 @@ function run_inference_workflow(models::Array{DPOMPModel,1}, priors::Array{Distr
             primary=primary, validation=validation, sample_interval=si)
         push!(output, r)
     end
+    println("- multi model workflow complete.")
     return output
 end
 
