@@ -8,7 +8,6 @@ Depth = 3
 
 ### Model types
 ```@docs
-DPOMPModel
 Particle
 Event
 Observation
