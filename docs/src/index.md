@@ -1,4 +1,6 @@
 # Introduction
+**Automated Bayesian workflows for Discrete-state-space Partially Observed Markov Processes**
+
 
 `BayesianWorkflows.jl` is a package for:
 

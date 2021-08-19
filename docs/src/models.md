@@ -18,8 +18,9 @@ They can be instantiated using the `generate_model` function:
 
 ``` julia
 using BayesianWorkflows
+model_name = "SIS"
 initial_model_state = [100, 1]
-model = generate_model("SIS", initial_model_state)
+model = generate_model(model_name, initial_model_state)
 ```
 
 NB. this generates a standard configuration of the named model that can be tweaked later.

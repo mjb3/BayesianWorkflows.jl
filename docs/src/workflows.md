@@ -15,24 +15,25 @@ x = gillespie_sim(model, theta)	# run simulation
 println(plot_trajectory(x))     # plot (optional)
 ```
 
-Simulations also provide a vector of simulated observations (`x.observations`) that can be used to try out the inference features of the package.
+See the [gillespie_sim](@ref) entry in the package manual for more details.
 
-```@docs
-gillespie_sim
-```
+Simulations also provide a vector of simulated observations (`x.observations`) that can be used to try out the inference features of the package.
 
 ## Inference workflows
 
-The package provides workflows for both single-model [i.e. paramerter-] inference and multi-model inference (or 'model comparison'.)
+The package implements three distinct workflows, covering both single-model [i.e. paramerter-] inference and multi-model inference (or 'model comparison'.)
 
 ### [Single-model] parameter inference
+The purpose of the first workflow is to 'infer' the [likely] model parameters, given a set of observations data `y`.
 
 ```
+y = x.observations            # using the simulated observations (see above)
 results = run_inference_workflow(model, prior, y)
 tabulate_results(results)
 ```
 
 ### Model comparison
+The second workflow is for situations where we have multiple candidate models and wish to formally evaluate them with respect to some observations data `y`.
 
 ```
 # define alternative model
@@ -48,3 +49,6 @@ tabulate_results(results)
 
 ### Multiple candidate prior distributions
 WIP
+
+## Inference algorithms
+TBA
