@@ -6,7 +6,7 @@ import Distributions
 Random.seed!(1)
 
 ## variables
-theta = [0.003, 0.1]
+theta = [0.003, 0.1]                # model parameters
 initial_condition = [100, 1]
 data_fp = "data/pooley.csv"
 y = get_observations(data_fp)
