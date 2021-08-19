@@ -51,9 +51,26 @@ function tabulate_results(results::SingleModelResults)
     tabulate_results(results.ibis)
     println("- MCMC RESULTS:")
     tabulate_results(results.mcmc)
-    ## ADD SAMPLE COMPARISON
+    ## TBA: SAMPLE COMPARISON
 end
 
+# - TBA: include parameter estimates? **
+function tabulate_results(results::Array{SingleModelResults, 1}; null_index = 1)
+    ## model evidence comparison:
+    function compute_bayes_factor(ml::Array{Float64,1}, null_index::Int64)
+        output = exp.(-ml)
+        output ./= output[1]
+        return output
+    end
+    ## results table:
+    h = ["Model", C_LBL_BME, "BF"]
+    d = Matrix(undef, length(results), length(h))
+    d[:,1] .= [r.model.name for r in results]
+    ml = [r.ibis.bme[1] for r in results]
+    d[:,2] .= round.(ml; digits = 1)
+    d[:,3] .= round.(compute_bayes_factor(ml, null_index); digits = 1)
+    PrettyTables.pretty_table(d, h)
+end
 
 ## IS resampler - artifical RejectionSamples
 # function resample_is(sample::ImportanceSample; n = 10000)

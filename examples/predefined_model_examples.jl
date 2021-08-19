@@ -35,7 +35,6 @@ function run_model_comp()
     # run workflow - WORK IN PROGRESS
     models::Array{DPOMPModel, 1} = [model, seis_model]
     priors::Array{Distributions.Distribution, 1} = [prior, seis_prior]
-    println(typeof(models), " -- ", typeof(priors))
     results = run_inference_workflow(models, priors, y)
     tabulate_results(results)
 end
