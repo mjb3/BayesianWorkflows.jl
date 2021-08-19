@@ -37,7 +37,7 @@ function model_comparison_example()
     seis_model = generate_model("SEIS", [100, 0, 1])
     seis_model.obs_model = partial_gaussian_obs_model(2.0, seq = 3, y_seq = 2)
     seis_prior = Distributions.Product(Distributions.Uniform.(zeros(3), [0.1,0.5,0.5]))
-    # run workflow - WORK IN PROGRESS
+    # run workflow
     models::Array{DPOMPModel, 1} = [model, seis_model]
     priors::Array{Distributions.Distribution, 1} = [prior, seis_prior]
     results = run_inference_workflow(models, priors, y)
