@@ -29,6 +29,16 @@ function get_prop_density(cv::Array{Float64,2}, old)
     end
 end
 
+## get normalised observation date values
+function get_norm_yt(res, col = 1)
+    dts = zeros(length(res[!,col]))
+    for i in eachindex(dts)
+        dts[i] = Dates.value(Dates.DateTime(res[i,col], "yyyy-mm-dd"))# / C_MS_DAY
+    end
+    dts .-= dts[1]
+    return dts
+end
+
 ## get observations data from DataFrame or file location
 """
     get_observations(source)
@@ -37,18 +47,26 @@ Return an array of type `Observation`, based on a two-dimensional array, `DataFr
 
 Note that a observation times must be in the first column of the input variable.
 """
-function get_observations(df::DataFrames.DataFrame; time_col=1, type_col=0, val_seq=2:size(df,2))
+function get_observations(df::DataFrames.DataFrame; time_col=1, type_col=0, val_seq=nothing)
+    val_seq = isnothing(val_seq) ? (2:size(df,2)) : val_seq
+    ## check dates
+    if eltype(df[:,time_col]) == Dates.Date
+        dts = Dates.value.(df[:,time_col])
+    else
+        dts = df[:,time_col]
+    end
+    ## populate output
     obs = Observation[]
     for i in 1:size(df,1)
         obs_type = type_col==0 ? 1 : df[i,type_col]
-        push!(obs, Observation(df[i,time_col], obs_type, 1.0, df[i,val_seq]))
+        push!(obs, Observation(dts[i], obs_type, 1.0, df[i,val_seq]))
     end
     sort!(obs)
     return obs
 end
-function get_observations(fpath::String)
+function get_observations(fpath::String; time_col=1, type_col=0, val_seq=nothing)
     df = CSV.read(fpath, DataFrames.DataFrame)
-    return get_observations(df)
+    return get_observations(df; time_col=time_col, type_col=type_col, val_seq=val_seq)
 end
 
 ## save simulation results to file

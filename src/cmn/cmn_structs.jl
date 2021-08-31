@@ -19,14 +19,14 @@ A `mutable struct` which represents a DSSCT model (see [Models](@ref) for furthe
 - `t0_index`            -- index of the parameter that represents the initial time. `0` if fixed at `0.0`.
 
 """
-mutable struct DPOMPModel{RFT<:Function, ICT<:Function, TFT<:Function, OMT<:Function, OFT<:Function}
+mutable struct DPOMPModel
     name::String                        # model name
     n_events::Int64                     # number of event types
-    rate_function::RFT                  # computes event rates (in place)
-    fn_initial_state::ICT               # aka initial condition
-    fn_transition::TFT                  # i.e adjusts the population according to event type
-    obs_model::OMT                      # observation model (log likelihood)
-    obs_function::OFT                   # observation function (sim only) - TO BE REMOVED (-> sim param)
+    rate_function::Function             # computes event rates (in place)
+    fn_initial_state::Function          # aka initial condition
+    fn_transition::Function             # i.e adjusts the population according to event type
+    obs_model::Function                 # observation model (log likelihood)
+    obs_function::Function              # observation function (sim only) - TO BE REMOVED (-> sim param)
     t0_index::Int64                     # == 0 if initial time known
 end
 # - `prior`               -- prior [multivariate] Distributions.Distribution.
