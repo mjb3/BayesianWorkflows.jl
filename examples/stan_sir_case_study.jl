@@ -16,7 +16,7 @@ Random.seed!(1)
 data_fp = "data/influenza_england_1978_school.csv"
 y = get_observations(data_fp; time_col=2, val_seq=3:4)
 df = CSV.read(data_fp, DataFrames.DataFrame)
-println("----\ndf: ", df, "----\ny: ", y)
+# println("----\ndf: ", df, "----\ny: ", y)
 
 ## variables
 population_size = 763
@@ -37,9 +37,8 @@ function get_prior()
     pr_beta = Truncated(Normal(2.0, 1.0), 0.0, Inf)
     pr_lambda = Truncated(Normal(0.4, 0.5), 0.0, Inf)
     phi_inv = Truncated(Exponential(5.0), 1.0, Inf)
-    t0_l = Dates.DateTime.(["1978-01-12", "1978-01-22"], "yyyy-mm-dd")
-    t0_b::Vector{Float64} = Dates.value.(t0_l)
-    println("t0_l: ", t0_l, "\nt0_b: ", t0_b)
+    t0_b::Vector{Float64} = Dates.value.(Dates.Date.(["1978-01-12", "1978-01-22"], "yyyy-mm-dd"))
+    println("t0_b: ", t0_b)
     t0 = Uniform(t0_b...)
     return Product([pr_beta, pr_lambda, phi_inv, t0])
 end
@@ -69,12 +68,12 @@ end
 model.obs_function = obs_fn!
 
 ## fit the model and check results
-# results = run_inference_workflow(model, prior, y)
-# tabulate_results(results)
+results = run_inference_workflow(model, prior, y)
+tabulate_results(results)
 
 ## predict
 # - i.e. resample parameters from posterior samples and simulate
 
 ## prior predictive check
 # - same but sample parameters from prior
-println("\nprior samples:\n", rand(prior, 10))
+# println("\nprior samples:\n", rand(prior, 1000))

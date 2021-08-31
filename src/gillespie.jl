@@ -130,7 +130,7 @@ end
 #### #### #### #### #### #### ####
 
 ## for inference
-function generate_x0(model::HiddenMarkovModel, ntries = 10000)#, theta::Array{Float64, 1}
+function generate_x0(model::HiddenMarkovModel, ntries = 50000)#, theta::Array{Float64, 1}
     theta = rand(model.prior)
     for i in 1:ntries
         x0 = gillespie_sim(model, theta, false).particle
