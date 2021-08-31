@@ -1,4 +1,11 @@
 #### tabulate stuff ####
+function prettify_n(n::Float64, sigdigs=C_PR_SIGDIG)
+    if n < 1
+        return round(n; sigdigits = sigdigs)
+    else
+        return round(n; digits = 1)
+    end
+end
 
 ## results summary
 #- `proposals`   -- display proposal analysis (MCMC only).
@@ -18,7 +25,7 @@ function tabulate_results(results::MCMCSample)
     d = Matrix(undef, length(results.samples.mu), 5)
     sd = compute_sigma(results.samples.cv)
     d[:,1] .= 1:length(results.samples.mu)
-    d[:,2] .= round.(results.samples.mu; sigdigits = C_PR_SIGDIG)
+    d[:,2] .= prettify_n.(results.samples.mu)
     d[:,3] .= round.(sd; sigdigits = C_PR_SIGDIG)
     d[:,4] .= round.(results.psrf[:,2]; sigdigits = C_PR_SIGDIG + 1)
     d[:,5] .= round.(results.psrf[:,3]; sigdigits = C_PR_SIGDIG + 1)
@@ -33,7 +40,7 @@ function tabulate_results(results::ImportanceSample)
     d = Matrix(undef, length(results.mu), 4)
     sd = compute_sigma(results.cv)
     d[:,1] .= 1:length(results.mu)
-    d[:,2] .= round.(results.mu; sigdigits = C_PR_SIGDIG)
+    d[:,2] .= prettify_n.(results.mu)
     d[:,3] .= round.(sd; sigdigits = C_PR_SIGDIG)
     d[:,4] .= 0
     bme_seq = C_DEBUG ? (1:2) : (1:1)

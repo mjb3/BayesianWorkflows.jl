@@ -1,6 +1,6 @@
 #### model helpers
-get_pop_size(m::DPOMPModel) = length(m.fn_initial_state())
-get_pop_size(m::HiddenMarkovModel) = length(m.fn_initial_state())
+get_pop_size(m::DPOMPModel, p::Vector{Float64}) = length(m.fn_initial_state(p))
+get_pop_size(m::HiddenMarkovModel) = length(m.fn_initial_state(rand(m.prior)))
 
 ## generate private model
 function get_private_model(m::DPOMPModel, prior::Distributions.Distribution, y::Array{Observation,1})
@@ -213,7 +213,7 @@ function generate_model(model_name::String, initial_condition::Array{Int64, 1}; 
         return  # handle this better? ***
     end
     ## TEMP - TO BE UPDATED ****************
-    fn_ic() = initial_condition
+    fn_ic(parameters::Vector{Float64}) = initial_condition
     fn_trans! = generate_trans_fn(m_transition)
     ## return model
     return DPOMPModel(model_name, size(m_transition, 1), rate_fn, fn_ic, fn_trans!, obs_model, dmy_obs_fn, t0_index)

@@ -59,7 +59,7 @@ end
 function gillespie_sim(model::HiddenMarkovModel, theta::Array{Float64, 1}, observe::Bool) #, y::Observations
     # initialise some things
     y = deepcopy(model.obs_data)
-    ic = model.fn_initial_state()
+    ic = model.fn_initial_state(theta)
     p = Particle(theta, ic, copy(ic), Event[], Distributions.logpdf(model.prior, theta), zeros(2))
     pop_v = Array{Int64}[]
     t = model.t0_index == 0 ? 0.0 : theta[model.t0_index]
@@ -107,7 +107,7 @@ end
 function gillespie_scenario(model::HiddenMarkovModel, theta::Array{Float64, 1}; tmax::Float64 = 720.0, ifn_y::Int64 = 0)
     ## initialise some things
     y = init_obs()
-    ic = model.fn_initial_state()
+    ic = model.fn_initial_state(theta)
     p = Particle(theta, ic, copy(ic), Event[], [model.fn_log_prior(theta), 0.0])
     pop_v = Array{Int64}[]
     t = model.t0_index == 0 ? 0.0 : theta[model.t0_index]
@@ -166,7 +166,7 @@ println(DiscretePOMP.plot_trajectory(x))
 
 """
 function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::Float64 = 100.0, num_obs::Int64 = 5, n_sims::Int64 = 1, n_test_types::Int64=1)
-    y = generate_observations(tmax, num_obs, get_pop_size(model), n_test_types)
+    y = generate_observations(tmax, num_obs, get_pop_size(model, parameters), n_test_types)
     mdl = get_private_model(model, generate_uniform_prior(length(parameters)), y)
     if n_sims == 1
         print("Running: ", model.name, " DGA for θ := ", parameters)
@@ -177,7 +177,7 @@ function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::F
         print("Running: ", model.name, " DGA for θ := ", parameters, " x ", n_sims)
         output = Array{SimResult,1}(undef, n_sims)
         for i in eachindex(output)
-            y = generate_observations(tmax, num_obs, get_pop_size(model), n_test_types)
+            y = generate_observations(tmax, num_obs, get_pop_size(model, parameters), n_test_types)
             output[i] = gillespie_sim(mdl, parameters, true)
         end
         println("- finished.")

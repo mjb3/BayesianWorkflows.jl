@@ -40,7 +40,7 @@ function partial_log_likelihood!(pop::Array{Int64,2}, model::HiddenMarkovModel, 
     ## initialise population matrix
     if ymin == 1
         for i in 1:size(pop, 1)
-            pop[i,:] .= model.fn_initial_state()
+            pop[i,:] .= model.fn_initial_state(parameters)
         end
         t_prev = model.t0_index == 0 ? 0.0 : parameters[model.t0_index]
     else

@@ -1,7 +1,5 @@
-## Stan case study ##
-# This [DPOMP] example mirrors the Bayesian workflow for disease transmission
-# modelling described here [for ODE models in Stan]:
-# https://mc-stan.org/users/documentation/case-studies/boarding_school_case_study.html
+## Two-species interaction model case study ##
+# - *** WIP ***
 
 using BayesianWorkflows
 using Distributions
@@ -12,14 +10,16 @@ import Dates
 
 Random.seed!(1)
 
-## influenza data (downloaded using 'outbreaks' pkg in R)
-data_fp = "data/influenza_england_1978_school.csv"
-y = get_observations(data_fp; time_col=2, val_seq=3:4)
+## data (downloaded using 'outbreaks' pkg in R)
+data_fp = "data/dengue_fais_2011.csv"
+# data_fp = "data/zika_yap_2007.csv"
+y = get_observations(data_fp; time_col=3, val_seq=4)
 # df = CSV.read(data_fp, DataFrames.DataFrame)
 # println("----\ndf: ", df, "----\ny: ", y)
 
 ## variables
-population_size = 763
+population_size = 294 # fais (2011)
+# population_size = 7391 # yap (2007 - 2011)
 initial_condition = [population_size - 1, 1, 0]
 # theta = [0.003, 0.1]                # model parameters
 
@@ -31,6 +31,9 @@ function get_model(freq_dep::Bool)
     PRM_BETA = 1
     PRM_LAMBDA = 2
     PRM_PHI = 3
+    ## rate function
+
+
     model = generate_model("SIR", initial_condition; freq_dep=freq_dep, t0_index=4)
     ## statistical model (or 'observation' model in the context of DPOMPs)
     OBS_BEDRIDDEN = 1
@@ -90,9 +93,9 @@ fit_model(true)
 
 ## predict
 # - i.e. resample parameters from posterior samples and simulate
-function simulate(freq_dep::Bool, parameters)
-    x = gillespie_sim(model, parameters)    # run simulation
-    println(plot_trajectory(x))             # plot (optional)
+function simulate(freq_dep::Bool)
+
+
 end
 
 ## prior predictive check
