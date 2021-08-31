@@ -55,6 +55,7 @@ function get_observations(df::DataFrames.DataFrame; time_col=1, type_col=0, val_
     else
         dts = df[:,time_col]
     end
+    # println("dts: ", typeof(dts), "\n", dts)
     ## populate output
     obs = Observation[]
     for i in 1:size(df,1)
