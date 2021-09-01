@@ -97,9 +97,8 @@ end
 # - i.e. resample parameters from posterior samples and simulate
 function simulate(freq_dep::Bool, parameters)
     model = get_model(freq_dep)
-    x = gillespie_sim(model, parameters; tmax=40.0, num_obs=40, n_sims=3)
-    println(plot_trajectory(x[1]))             # plot (optional)
-    # println(x.observations)
+    x = gillespie_sim(model, parameters; tmax=40.0, num_obs=40, n_sims=10)
+    println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
     println(plot_observations(x; plot_index=1))
 end
 simulate(true, [1.8, 0.405, 1.85, 722104.0])

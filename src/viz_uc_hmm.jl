@@ -37,15 +37,6 @@ Plot the trajectory of observation values for one or more [simulated or real] da
 The only input parameter required is `x` of type `SimResults`, i.e. from a call to `gillespie_sim`. The first observation value is plotted by default, but another can be specified by passing an integer to the `plot_index` option.
 """
 function plot_observations(observations::Vector{Vector{Observation}}; plot_index=1, date_type=Float64, title=C_PLT_OBS_TTL)
-    ## collect time and population
-    # t = zeros(length(observations[1]))
-    # y = zeros(Int64, length(observations[]), size(observations, 2))
-    # for i in 1:size(observations, 1)
-    #     t[i] = observations[i, 1].time
-    #     for j in 1:size(observations, 2)
-    #         y[i, j] = observations[i, j].val[plot_index]
-    #     end
-    # end
     mx = maximum([observations[i][j].val[plot_index] for i in eachindex(observations) for j in eachindex(observations[i])])
     ## plot
     t1 = [observations[1][i].time for i in eachindex(observations[1])]
@@ -62,8 +53,6 @@ function plot_observations(observations::Vector{Vector{Observation}}; plot_index
 end
 # -
 function plot_observations(observations::Vector{Observation}; plot_index=1, date_type=Float64, title=C_PLT_OBS_TTL)
-    # y = Array{Observation,2}(undef, length(observations), 1)
-    # y .= observations
     return plot_observations([y]; plot_index=plot_index, date_type=date_type, title=title)
 end
 # -
