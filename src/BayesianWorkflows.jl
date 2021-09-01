@@ -134,12 +134,13 @@ end
 ## public functions and types
 export DPOMPModel, Particle, Event, Observation
 export SimResults, ImportanceSample, RejectionSample, MCMCSample
+export SingleModelResults, ModelComparisonResults
 export ARQModel, ARQMCMCSample
 export generate_model
 export partial_gaussian_obs_model
 export gillespie_sim
 export get_observations
-export tabulate_results, save_to_file
+export tabulate_results, save_to_file, resample
 export plot_trajectory, plot_observations
 export plot_parameter_trace, plot_parameter_heatmap, plot_parameter_marginal
 export run_inference_workflow

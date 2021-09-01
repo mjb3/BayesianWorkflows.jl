@@ -45,7 +45,7 @@ function plot_parameter_heatmap(sample::ARQMCMCSample, x_parameter::Int64, y_par
 end
 
 function plot_parameter_marginal(sample::ARQMCMCSample, parameter::Int64; use_is::Bool = false)
-    x = use_is ? resample_is(sample.imp_sample) : sample.samples
+    x = use_is ? resample(sample.imp_sample) : sample.samples
     xx =  use_is ? x.theta[parameter,:,:] : x.theta[parameter, (sample.adapt_period+1):size(x.theta, 2), :]
     nbins = Int(round((maximum(xx) - minimum(xx)) / sample.sample_interval[parameter]))
     return plot_parameter_marginal(x, parameter, use_is ? 0 : sample.adapt_period, nbins)

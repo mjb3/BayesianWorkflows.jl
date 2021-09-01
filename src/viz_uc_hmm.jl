@@ -53,7 +53,7 @@ function plot_observations(observations::Vector{Vector{Observation}}; plot_index
 end
 # -
 function plot_observations(observations::Vector{Observation}; plot_index=1, date_type=Float64, title=C_PLT_OBS_TTL)
-    return plot_observations([y]; plot_index=plot_index, date_type=date_type, title=title)
+    return plot_observations([observations]; plot_index=plot_index, date_type=date_type, title=title)
 end
 # -
 function plot_observations(x::SimResults; plot_index=1, date_type=Float64, title=C_PLT_OBS_TTL)
@@ -117,7 +117,7 @@ end
 
 ## resampler
 function plot_parameter_marginal(sample::ImportanceSample, parameter::Int64; nbins = 20)
-    rs = resample_is(sample)
+    rs = resample(sample)
     return plot_parameter_marginal(rs, parameter, 0, nbins)
 end
 
@@ -153,7 +153,7 @@ end
 
 ## resampler
 function plot_parameter_heatmap(sample::ImportanceSample, x_parameter::Int64, y_parameter::Int64)
-    rs = resample_is(sample)
+    rs = resample(sample)
     return plot_parameter_heatmap(rs, x_parameter, y_parameter, 0)
 end
 

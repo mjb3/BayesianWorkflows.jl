@@ -109,6 +109,17 @@ struct MCMCSample
 end
 
 ## ADD DOCS
+"""
+    SingleModelResults
+
+The results of a single-model inference analysis.
+
+**Fields**
+- `model`       -- model names.
+- `ibis`        -- primary analysis IBIS results.
+- `mcmc`        -- validation analysis MCMC results.
+
+"""
 struct SingleModelResults
     model::DPOMPModel
     ibis::ImportanceSample

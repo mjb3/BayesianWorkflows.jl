@@ -1,22 +1,42 @@
 #### resampling ####
 C_DFT_N_RESAMPLES = 10000
 ## IS resampler
+"""
+    resample(sample; n = 10000 [, discard = 0])
+
+Resample a results type of some kind, e.g. MCMCSample, ImportanceSample or SingleModelResults.
+
+**Parameters**
+- `sample`      -- parameter inference results of some kind.
+- `n`           -- the index of the model parameter to be plotted on the x axis.
+- `discard`     -- number of initial samples to be discarded - applicable to `sample` of type RejectionSamples only.
+
+"""
 function resample(sample::ImportanceSample; n::Int64 = C_DFT_N_RESAMPLES)
     rsi = StatsBase.sample(collect(1:length(sample.weight)), StatsBase.Weights(sample.weight), n)
     resamples = zeros(length(sample.mu), n, 1)
     for i in eachindex(rsi)
         resamples[:,i,1] .= sample.theta[:,rsi[i]]
     end
-    return RejectionSample(resamples, sample.mu, sample.cv)
+    return resamples
 end
 ## rejection samples
-function resample(sample::RejectionSample; n::Int64 = C_DFT_N_RESAMPLES)
-    rsi = StatsBase.sample(collect(1:length(sample.weight)), StatsBase.Weights(sample.weight), n)
+function resample(sample::RejectionSample; n::Int64 = C_DFT_N_RESAMPLES, discard::Int64=0)
     resamples = zeros(length(sample.mu), n, 1)
-    for i in eachindex(rsi)
-        resamples[:,i,1] .= sample.theta[:,rsi[i]]
+    ns = size(sample.theta, 2)
+    nc = size(sample.theta, 3)
+    for i in 1:n
+        resamples[:,i,1] .= sample.theta[:,rand((discard+1):ns), rand(1:nc)]
     end
-    return RejectionSample(resamples, sample.mu, sample.cv)
+    return resamples
+end
+## - mcmc
+function resample(sample::MCMCSample; n::Int64 = C_DFT_N_RESAMPLES)
+    return resample(sample.samples; n=n, discard=sample.adapt_period)
+end
+# - single model
+function resample(sample::SingleModelResults; n::Int64 = C_DFT_N_RESAMPLES)
+    return resample(sample.ibis; n=n)
 end
 
 #### other printing ####

@@ -20,6 +20,8 @@ ImportanceSample
 RejectionSample
 MCMCSample
 ARQMCMCSample
+SingleModelResults
+ModelComparisonResults
 ```
 
 ## Functions
@@ -60,6 +62,7 @@ run_model_comparison_analysis
 
 ### Utilities
 ```@docs
+resample
 get_observations
 tabulate_results
 save_to_file
@@ -69,6 +72,7 @@ save_to_file
 
 ```@docs
 plot_trajectory
+plot_observations
 plot_parameter_trace
 plot_parameter_marginal
 plot_parameter_heatmap

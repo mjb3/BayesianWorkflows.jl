@@ -166,7 +166,6 @@ println(DiscretePOMP.plot_trajectory(x))
 
 """
 function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::Float64 = 100.0, num_obs::Int64 = 5, n_sims::Int64 = 1, n_test_types::Int64=1)
-    mdl = get_private_model(model, generate_uniform_prior(length(parameters)), y)
     if n_sims == 1
         print("Running: ", model.name, " DGA for θ := ", parameters)
         y = generate_observations(tmax, num_obs, get_pop_size(model, parameters), n_test_types)
@@ -178,6 +177,7 @@ function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::F
         output = Array{SimResults,1}(undef, n_sims)
         for i in eachindex(output)
             y = generate_observations(tmax, num_obs, get_pop_size(model, parameters), n_test_types)
+            mdl = get_private_model(model, generate_uniform_prior(length(parameters)), y)
             output[i] = gillespie_sim(mdl, parameters, true)
         end
         println("- finished.")
@@ -186,10 +186,11 @@ function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::F
 end
 # - multiple parameter sets
 function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 2}; tmax::Float64 = 100.0, num_obs::Int64 = 5, n_test_types::Int64=1)
-    print("Running: ", model.name, " DGA for θ := ", parameters, " x ", n_sims)
+    print("Running: ", model.name, " DGA  x ", size(parameters, 2))
     output = Array{SimResults,1}(undef, size(parameters, 2))
     for i in eachindex(output)
-        y = generate_observations(tmax, num_obs, get_pop_size(model, parameters), n_test_types)
+        y = generate_observations(tmax, num_obs, get_pop_size(model, parameters[:,i]), n_test_types)
+        mdl = get_private_model(model, generate_uniform_prior(size(parameters, 1)), y)
         output[i] = gillespie_sim(mdl, parameters[:,i], true)
     end
     println("- finished.")

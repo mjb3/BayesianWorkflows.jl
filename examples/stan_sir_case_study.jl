@@ -18,10 +18,11 @@ y = get_observations(data_fp; time_col=2, val_seq=3:4)
 # df = CSV.read(data_fp, DataFrames.DataFrame)
 # println("----\ndf: ", df, "----\ny: ", y)
 
-## variables
+## constants
 population_size = 763
 initial_condition = [population_size - 1, 1, 0]
-# theta = [0.003, 0.1]                # model parameters
+n_observations = 40
+max_time = 40.0
 
 ## define transmission model
 function get_model(freq_dep::Bool)
@@ -61,15 +62,26 @@ function get_model(freq_dep::Bool)
     return model
 end
 
+## simulate
+function simulate(freq_dep::Bool)
+    model = get_model(freq_dep)
+    parameters = [1.8, 0.405, 1.85, 722104.0]
+    x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations, n_sims=10)
+    println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
+    println(plot_observations(x; plot_index=1))
+end
+simulate(true)
+
 ## prior distribution
 function get_prior(freq_dep::Bool)
     beta_p = freq_dep ? [2.0, 1.0] : [2.0, 1.0] / population_size
     pr_beta = Truncated(Normal(beta_p...), 0.0, Inf)
     pr_lambda = Truncated(Normal(0.4, 0.5), 0.0, Inf)
     phi_inv = Truncated(Exponential(5.0), 1.0, Inf)
-    t0_lim = Dates.value.(Dates.Date.(["1978-01-16", "1978-01-22"], "yyyy-mm-dd"))
-    println("t0_lim: ", t0_lim)
-    t0 = Uniform(t0_lim...)
+    t0_lim = ["1978-01-16", "1978-01-22"]
+    t0_values = Dates.value.(Dates.Date.(t0_lim, "yyyy-mm-dd"))
+    println("t0 mapping: ", t0_lim, " := ", t0_values)
+    t0 = Uniform(t0_values...)
     return Product([pr_beta, pr_lambda, phi_inv, t0])
 end
 
@@ -83,28 +95,44 @@ function fit_model(freq_dep::Bool)
     prior = get_prior(freq_dep)
     # - data augmented:
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
-    results = run_inference_workflow(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
-    tabulate_results(results)
+    da_results = run_inference_workflow(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
+    tabulate_results(da_results)
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
-    results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
-    tabulate_results(results)
+    smc_results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
+    tabulate_results(smc_results)
+    ## return as named tuple
+    return (da_results = da_results, smc_results = smc_results)
 end
-# fit_model(false)
-# fit_model(true)
+# dd_results = fit_model(false)
+# fd_results = fit_model(true)
 
 ## predict
 # - i.e. resample parameters from posterior samples and simulate
-function simulate(freq_dep::Bool, parameters)
-    model = get_model(freq_dep)
-    x = gillespie_sim(model, parameters; tmax=40.0, num_obs=40, n_sims=10)
+function predict(results::SingleModelResults)
+    model = results.model
+    parameters = resample(results; n = 10)
+    x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
     println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
     println(plot_observations(x; plot_index=1))
 end
-simulate(true, [1.8, 0.405, 1.85, 722104.0])
+# predict(fd_results.smc_results)
 
 ## prior predictive check
 # - same but sample parameters from prior
-println("\nprior samples:\n", rand(prior, 1000))
+function prior_predict(freq_dep::Bool)
+    model = get_model(freq_dep)
+    prior = get_prior(freq_dep)
+    parameters = rand(prior, 10)
+    x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
+    println(plot_observations(x; plot_index=1))
+    for i in eachindex(x)
+        println("PARAMS: ", parameters[:,i])
+        println(plot_trajectory(x[i]))             # plot a full state trajectory (optional)
+        println("OBS: ", x[i].observations)
+        println(plot_observations(x[i]))
+    end
+end
+prior_predict(true)
 
 ## model comparison
