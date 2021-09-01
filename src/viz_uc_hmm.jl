@@ -30,7 +30,7 @@ end
 ## observations data
 C_PLT_OBS_TTL = "Observation trajectory"
 """
-    plot_observations(x; plot_index=[:])
+    plot_observations(x; plot_index=1)
 
 Plot the trajectory of observation values for one or more [simulated or real] data sets using [UnicodePlots.jl](https://github.com/Evizero/UnicodePlots.jl).
 
@@ -38,7 +38,7 @@ The only input parameter required is `x` of type `SimResults`, i.e. from a call 
 """
 function plot_observations(observations::Vector{Vector{Observation}}; plot_index=1, date_type=Float64, title=C_PLT_OBS_TTL)
     ## collect time and population
-    t = zeros(length(observations[1]))
+    # t = zeros(length(observations[1]))
     # y = zeros(Int64, length(observations[]), size(observations, 2))
     # for i in 1:size(observations, 1)
     #     t[i] = observations[i, 1].time
@@ -46,10 +46,15 @@ function plot_observations(observations::Vector{Vector{Observation}}; plot_index
     #         y[i, j] = observations[i, j].val[plot_index]
     #     end
     # end
+    mx = maximum([observations[i][j].val[plot_index] for i in eachindex(observations) for j in eachindex(observations[i])])
     ## plot
-    p = UnicodePlots.lineplot(t, y[:,1], title=title, ylim = [0, maximum(y) + 1])#, name="y"
-    for i in 2:size(y, 2)
-        UnicodePlots.lineplot!(p, t, y[:,i])#, name = string(x.model_name[plot_index[i]])
+    t1 = [observations[1][i].time for i in eachindex(observations[1])]
+    y1 = [observations[1][i].val[plot_index] for i in eachindex(observations[1])]
+    p = UnicodePlots.lineplot(t1, y1, title=title, ylim = [0, mx + 1])#, name="y"
+    for i in 2:length(observations)
+        t = [observations[i][j].time for j in eachindex(observations[i])]
+        y = [observations[i][j].val[plot_index] for j in eachindex(observations[i])]
+        UnicodePlots.lineplot!(p, t, y)#, name = string(x.model_name[plot_index[i]])
     end
     UnicodePlots.xlabel!(p, "time")
     UnicodePlots.ylabel!(p, "y")
