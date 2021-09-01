@@ -115,7 +115,7 @@ function plot_parameter_marginal(sample::MCMCSample, parameter::Int64; nbins = 2
     return plot_parameter_marginal(sample.samples, parameter, sample.adapt_period, nbins)
 end
 
-## resampler - MAKE BAYESIAN SOMEHOW? ****
+## resampler
 function plot_parameter_marginal(sample::ImportanceSample, parameter::Int64; nbins = 20)
     rs = resample_is(sample)
     return plot_parameter_marginal(rs, parameter, 0, nbins)

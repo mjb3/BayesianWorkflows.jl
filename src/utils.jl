@@ -1,3 +1,24 @@
+#### resampling ####
+C_DFT_N_RESAMPLES = 10000
+## IS resampler
+function resample(sample::ImportanceSample; n::Int64 = C_DFT_N_RESAMPLES)
+    rsi = StatsBase.sample(collect(1:length(sample.weight)), StatsBase.Weights(sample.weight), n)
+    resamples = zeros(length(sample.mu), n, 1)
+    for i in eachindex(rsi)
+        resamples[:,i,1] .= sample.theta[:,rsi[i]]
+    end
+    return RejectionSample(resamples, sample.mu, sample.cv)
+end
+## rejection samples
+function resample(sample::RejectionSample; n::Int64 = C_DFT_N_RESAMPLES)
+    rsi = StatsBase.sample(collect(1:length(sample.weight)), StatsBase.Weights(sample.weight), n)
+    resamples = zeros(length(sample.mu), n, 1)
+    for i in eachindex(rsi)
+        resamples[:,i,1] .= sample.theta[:,rsi[i]]
+    end
+    return RejectionSample(resamples, sample.mu, sample.cv)
+end
+
 #### other printing ####
 
 ## save simulation results to file REPL BY save_to_file

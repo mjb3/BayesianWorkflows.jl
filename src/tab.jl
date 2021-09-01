@@ -78,30 +78,3 @@ function tabulate_results(results::Array{SingleModelResults, 1}; null_index = 1)
     d[:,3] .= round.(compute_bayes_factor(ml, null_index); digits = 1)
     PrettyTables.pretty_table(d, h)
 end
-
-## IS resampler - artifical RejectionSamples
-# function resample_is(sample::ImportanceSample; n = 10000)
-#     rsi = StatsBase.sample(collect(1:length(sample.weight)), StatsBase.Weights(sample.weight), n)
-#     resamples = zeros(length(sample.mu), n, 1)
-#     for i in eachindex(rsi)
-#         resamples[:,i,1] .= sample.theta[:,rsi[i]]
-#     end
-#     return RejectionSample(resamples, sample.mu, sample.cv)
-# end
-#
-# function compute_bayes_factor(ml::Array{Float64,1}, null_index::Int64)
-#     output = exp.(-ml)
-#     output ./= output[1]
-#     return output
-# end
-#
-# ## model evidence comparison
-# function tabulate_results(results::ModelComparisonResults; null_index = 1)
-#     h = ["Model", string("ln E[p(y)]"), ":σ", "BF"]   # ADD THETA ******************
-#     d = Matrix(undef, length(results.mu), length(h))
-#     d[:,1] .= results.names
-#     d[:,2] .= round.(results.mu; digits = 1)
-#     d[:,3] .= round.(results.sigma; sigdigits = C_PR_SIGDIG)
-#     d[:,4] .= round.(compute_bayes_factor(results.mu, null_index); digits = 1)
-#     PrettyTables.pretty_table(d, h)
-# end

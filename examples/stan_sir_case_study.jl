@@ -105,6 +105,6 @@ simulate(true, [1.8, 0.405, 1.85, 722104.0])
 
 ## prior predictive check
 # - same but sample parameters from prior
-# println("\nprior samples:\n", rand(prior, 1000))
+println("\nprior samples:\n", rand(prior, 1000))
 
 ## model comparison
