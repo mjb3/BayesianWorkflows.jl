@@ -140,7 +140,8 @@ export partial_gaussian_obs_model
 export gillespie_sim
 export get_observations
 export tabulate_results, save_to_file
-export plot_trajectory, plot_parameter_trace, plot_parameter_heatmap, plot_parameter_marginal
+export plot_trajectory, plot_observations
+export plot_parameter_trace, plot_parameter_heatmap, plot_parameter_marginal
 export run_inference_workflow
 export plot_model_comparison
 export run_smc2_analysis, run_mcmc_analysis, run_mbp_ibis_analysis, run_arq_mcmc_analysis

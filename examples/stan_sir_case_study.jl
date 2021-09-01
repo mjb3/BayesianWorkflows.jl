@@ -29,7 +29,7 @@ function get_model(freq_dep::Bool)
     STATE_I = 2
     STATE_R = 3
     PRM_BETA = 1
-    PRM_LAMBDA = 2
+    PRM_GAMMA = 2
     PRM_PHI = 3
     model = generate_model("SIR", initial_condition; freq_dep=freq_dep, t0_index=4)
     ## statistical model (or 'observation' model in the context of DPOMPs)
@@ -37,6 +37,7 @@ function get_model(freq_dep::Bool)
     OBS_CONV = 2
     function obs_model(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Array{Float64,1})
         try
+            population[STATE_I] == y.val[OBS_BEDRIDDEN] == 0 && (return 0.0)
             population[STATE_I] < y.val[OBS_BEDRIDDEN] && (return -Inf)
             obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
             return logpdf(obs_dist, y.val[OBS_BEDRIDDEN])
@@ -48,8 +49,12 @@ function get_model(freq_dep::Bool)
     model.obs_model = obs_model
     ## for sampling y
     function obs_fn!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64})
-        obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
-        y.val[OBS_BEDRIDDEN] = rand(obs_dist)
+        if population[STATE_I] > 0
+            obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
+            y.val[OBS_BEDRIDDEN] = rand(obs_dist)
+        else
+            y.val[OBS_BEDRIDDEN] = 0
+        end
         y.val[OBS_CONV] = population[STATE_R]
     end
     model.obs_function = obs_fn!
@@ -85,15 +90,19 @@ function fit_model(freq_dep::Bool)
     results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
     tabulate_results(results)
 end
-fit_model(false)
-fit_model(true)
+# fit_model(false)
+# fit_model(true)
 
 ## predict
 # - i.e. resample parameters from posterior samples and simulate
 function simulate(freq_dep::Bool, parameters)
-    x = gillespie_sim(model, parameters)    # run simulation
-    println(plot_trajectory(x))             # plot (optional)
+    model = get_model(freq_dep)
+    x = gillespie_sim(model, parameters; tmax=40.0, num_obs=40, n_sims=3)
+    println(plot_trajectory(x[1]))             # plot (optional)
+    # println(x.observations)
+    println(plot_observations(x; plot_index=1))
 end
+simulate(true, [1.8, 0.405, 1.85, 722104.0])
 
 ## prior predictive check
 # - same but sample parameters from prior

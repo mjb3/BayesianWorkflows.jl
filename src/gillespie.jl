@@ -175,7 +175,7 @@ function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::F
         return output
     else
         print("Running: ", model.name, " DGA for θ := ", parameters, " x ", n_sims)
-        output = Array{SimResult,1}(undef, n_sims)
+        output = Array{SimResults,1}(undef, n_sims)
         for i in eachindex(output)
             y = generate_observations(tmax, num_obs, get_pop_size(model, parameters), n_test_types)
             output[i] = gillespie_sim(mdl, parameters, true)
