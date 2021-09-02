@@ -114,13 +114,20 @@ function run_inference_workflow(models::Array{DPOMPModel,1}, priors::Array{Distr
     ## collect individual results and return
     output::Array{SingleModelResults, 1} = []
     for i in eachindex(models)
-        si = sample_intervals==nothing ? nothing : si[i]
+        si = sample_intervals==nothing ? nothing : sample_intervals[i]
         r = run_inference_workflow(models[i], priors[i], obs_data;
             primary=primary, validation=validation, sample_interval=si)
         push!(output, r)
     end
     println("- multi model workflow complete.")
     return output
+end
+# - alternative mask
+function run_inference_workflow(models::Array{DPOMPModel,1}, priors::Array, obs_data::Array{Observation,1};
+    primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_intervals=nothing)
+
+    p::Array{Distributions.Distribution,1} = priors
+    run_inference_workflow(models, p, obs_data, primary=primary, validation=validation, sample_intervals=sample_intervals)
 end
 
 # - multi prior (ARQ only)

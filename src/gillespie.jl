@@ -196,3 +196,8 @@ function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 2}; tmax::F
     println("- finished.")
     return output
 end
+# - ditto
+function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 3}; tmax::Float64 = 100.0, num_obs::Int64 = 5, n_test_types::Int64=1)
+    theta = reshape(parameters, size(parameters, 1), size(parameters, 2) * size(parameters, 3))
+    return gillespie_sim(model, theta; tmax=tmax, num_obs=num_obs, n_test_types=n_test_types)
+end
