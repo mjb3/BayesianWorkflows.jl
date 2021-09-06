@@ -69,7 +69,7 @@ end
 
 ## workflows
 # - single model workflow
-function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1};
+function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1};
     primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_interval=nothing)
 
     ## type conversion
@@ -105,7 +105,7 @@ function run_inference_workflow(model::DPOMPModel, prior::Distributions.Distribu
     return SingleModelResults(model, ibis, mcmc)
 end
 # - multi model
-function run_inference_workflow(models::Array{DPOMPModel,1}, priors::Array{Distributions.Distribution,1}, obs_data::Array{Observation,1};
+function run_inference_analysis(models::Array{DPOMPModel,1}, priors::Array{Distributions.Distribution,1}, obs_data::Array{Observation,1};
     primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_intervals=nothing)
 
     ## check values
@@ -115,7 +115,7 @@ function run_inference_workflow(models::Array{DPOMPModel,1}, priors::Array{Distr
     output::Array{SingleModelResults, 1} = []
     for i in eachindex(models)
         si = sample_intervals==nothing ? nothing : sample_intervals[i]
-        r = run_inference_workflow(models[i], priors[i], obs_data;
+        r = run_inference_analysis(models[i], priors[i], obs_data;
             primary=primary, validation=validation, sample_interval=si)
         push!(output, r)
     end
@@ -123,15 +123,15 @@ function run_inference_workflow(models::Array{DPOMPModel,1}, priors::Array{Distr
     return output
 end
 # - alternative mask
-function run_inference_workflow(models::Array{DPOMPModel,1}, priors::Array, obs_data::Array{Observation,1};
+function run_inference_analysis(models::Array{DPOMPModel,1}, priors::Array, obs_data::Array{Observation,1};
     primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_intervals=nothing)
 
     p::Array{Distributions.Distribution,1} = priors
-    run_inference_workflow(models, p, obs_data, primary=primary, validation=validation, sample_intervals=sample_intervals)
+    run_inference_analysis(models, p, obs_data, primary=primary, validation=validation, sample_intervals=sample_intervals)
 end
 
 # - multi prior (ARQ only)
-function run_inference_workflow(model::DPOMPModel, priors::Array{Distributions.Distribution}, obs_data::Array{Observation,1}, sample_interval::Array{Float64,1})
+function run_inference_analysis(model::DPOMPModel, priors::Array{Distributions.Distribution}, obs_data::Array{Observation,1}, sample_interval::Array{Float64,1})
     println("multiple prior workflow is a WIP!")
     for i in eachindex(priors)
         # mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval)
@@ -150,7 +150,7 @@ export get_observations
 export tabulate_results, save_to_file, resample
 export plot_trajectory, plot_observations
 export plot_parameter_trace, plot_parameter_heatmap, plot_parameter_marginal
-export run_inference_workflow
+export run_inference_analysis
 export plot_model_comparison
 export run_smc2_analysis, run_mcmc_analysis, run_mbp_ibis_analysis, run_arq_mcmc_analysis
 

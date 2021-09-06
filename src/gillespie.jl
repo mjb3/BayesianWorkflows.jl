@@ -169,6 +169,7 @@ function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 1}; tmax::F
     if n_sims == 1
         print("Running: ", model.name, " DGA for θ := ", parameters)
         y = generate_observations(tmax, num_obs, get_pop_size(model, parameters), n_test_types)
+        mdl = get_private_model(model, generate_uniform_prior(length(parameters)), y)
         output = gillespie_sim(mdl, parameters, true)
         println("- finished.")
         return output

@@ -10,7 +10,7 @@ import CSV
 import DataFrames
 import Dates
 
-Random.seed!(1)
+Random.seed!(2)
 
 ## constants
 population_size = 763
@@ -25,7 +25,7 @@ y = get_observations(data_fp; time_col=2, val_seq=3:4)
 # println("----\ndf: ", df, "----\ny: ", y)
 println(plot_observations(y; plot_index=1))
 
-## define transmission model
+## model construction
 function get_model(freq_dep::Bool)
     STATE_S = 1
     STATE_I = 2
@@ -99,11 +99,11 @@ function fit_model(freq_dep::Bool)
     prior = get_prior(freq_dep)
     # - data augmented:
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
-    da_results = run_inference_workflow(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
+    da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
     tabulate_results(da_results)
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
-    smc_results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
+    smc_results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
     tabulate_results(smc_results)
     ## return as named tuple
     return (da_results = da_results, smc_results = smc_results)
@@ -116,7 +116,7 @@ function model_comparison()
     priors = get_prior.([false, true])
     sample_intervals = sample_interval.([false, true])
     ## run analysis
-    results = run_inference_workflow(models, priors, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_intervals)
+    results = run_inference_analysis(models, priors, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_intervals)
     tabulate_results(results)
 end
 
@@ -148,8 +148,6 @@ function prior_predict(freq_dep::Bool)
     # end
 end
 
-
-
 ## simulated inference
 function simulated_inference(freq_dep::Bool)
     println("\n-- SIMULATED INFERENCE CHECK --")
@@ -163,17 +161,17 @@ function simulated_inference(freq_dep::Bool)
     plot_observations
     ## run inference
     # - data augmented:
-    println("\n---- DATA AUGMENTATED ALGORITHMS ----")
-    da_results = run_inference_workflow(model, prior, x.observations; primary=BayesianWorkflows.C_ALG_NM_MBPI)
-    tabulate_results(da_results)
+    # println("\n---- DATA AUGMENTATED ALGORITHMS ----")
+    # da_results = run_inference_analysis(model, prior, x.observations; primary=BayesianWorkflows.C_ALG_NM_MBPI)
+    # tabulate_results(da_results)
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
-    smc_results = run_inference_workflow(model, prior, x.observations; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
+    smc_results = run_inference_analysis(model, prior, x.observations; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
     tabulate_results(smc_results)
 end
 
 ## RUN WORKFLOW FROM HERE:
-# dd_results = fit_model(false) # single model inference:
+# dd_results = fit_model(false)   # single model inference:
 fd_results = fit_model(true)
 model_comparison()              # compare models
 predict(fd_results.smc_results) # posterior predictive check
