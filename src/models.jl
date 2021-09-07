@@ -4,7 +4,7 @@ get_pop_size(m::HiddenMarkovModel) = length(m.initial_state(rand(m.prior)))
 
 ## generate private model
 function get_private_model(m::DPOMPModel, prior::Distributions.Distribution, y::Array{Observation,1})
-    return HiddenMarkovModel(m.name, m.n_events, m.event_rates!, m.initial_state, m.transition!, m.obs_model, m.obs_function, m.t0_index, y, prior)
+    return HiddenMarkovModel(m.name, m.n_events, m.event_rates!, m.initial_state, m.transition!, m.obs_loglike, m.obs_function, m.t0_index, y, prior)
 end
 
 ## dummy obs function - MAKE PUBLIC

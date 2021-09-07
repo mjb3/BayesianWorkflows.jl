@@ -40,11 +40,10 @@ function get_model()
     # - observation function
     function obs_fn!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64 })
         di = Distributions.Binomial(population[INFECTIOUS], PROB_DETECTION_I)
-        dd = Distributions.Binomial(population[DEATH], PROB_DETECTION_I)
+        dd = Distributions.Binomial(population[DEATH], PROB_DETECTION_D)
         y.val[OBSERVED_STATES] .= [rand(di), rand(dd)]
     end
     # - observation model
-    # obs_model = BayesianWorkflows.partial_gaussian_obs_model(2.0; seq = 3)
     function obs_model(y::BayesianWorkflows.Observation, population::Array{Int64,1}, theta::Array{Float64,1})
         d = Distributions.Binomial.(population[OBSERVED_STATES], [PROB_DETECTION_I, PROB_DETECTION_D])
         return Distributions.logpdf(Distributions.Product(d), y.val[OBSERVED_STATES])

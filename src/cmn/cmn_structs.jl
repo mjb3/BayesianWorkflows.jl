@@ -24,7 +24,7 @@ mutable struct DPOMPModel
     event_rates!::Function              # computes event rates (in place)
     initial_state::Function             # aka initial condition
     transition!::Function               # i.e adjusts the population according to event type
-    obs_model::Function                 # observation model (log likelihood)
+    obs_loglike::Function               # observation model (log likelihood)
     obs_function::Function              # observation function (sim only) - TO BE REMOVED (-> sim param)
     t0_index::Int64                     # == 0 if initial time known
 end
