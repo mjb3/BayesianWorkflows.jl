@@ -98,7 +98,8 @@ function compute_full_log_like!(model::HiddenMarkovModel, p::Particle)
                     p.log_like[1] = -Inf
                     return
                 end
-                p.final_condition .+= model.fn_transition(p.trajectory[evt_i].event_type)
+                # p.final_condition .+= model.fn_transition(p.trajectory[evt_i].event_type, p.final_condition)
+                model.transition!(p.final_condition, p.trajectory[evt_i].event_type)
                 if any(x->x<0, p.final_condition)
                     p.log_like[1] = -Inf
                     return

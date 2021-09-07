@@ -26,7 +26,7 @@ sample_interval = [0.0005, 0.02]    # intervals used for ARQ algorithm
 ## single model workflow
 function parameter_inference_example()
     println("\n-- RUNNING SINGLE-MODEL INFERENCE WORKFLOW --")
-    results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
+    results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
     tabulate_results(results)
 end
 
@@ -40,7 +40,7 @@ function model_comparison_example()
     # run model comparison workflow
     models::Array{DPOMPModel, 1} = [model, seis_model]
     priors::Array{Distributions.Distribution, 1} = [prior, seis_prior]
-    results = run_inference_workflow(models, priors, y)
+    results = run_inference_analysis(models, priors, y)
     tabulate_results(results)
 end
 

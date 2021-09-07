@@ -1,10 +1,10 @@
 #### model helpers
-get_pop_size(m::DPOMPModel, p::Vector{Float64}) = length(m.fn_initial_state(p))
-get_pop_size(m::HiddenMarkovModel) = length(m.fn_initial_state(rand(m.prior)))
+get_pop_size(m::DPOMPModel, p::Vector{Float64}) = length(m.initial_state(p))
+get_pop_size(m::HiddenMarkovModel) = length(m.initial_state(rand(m.prior)))
 
 ## generate private model
 function get_private_model(m::DPOMPModel, prior::Distributions.Distribution, y::Array{Observation,1})
-    return HiddenMarkovModel(m.name, m.n_events, m.rate_function, m.fn_initial_state, m.fn_transition, m.obs_model, m.obs_function, m.t0_index, y, prior)
+    return HiddenMarkovModel(m.name, m.n_events, m.event_rates!, m.initial_state, m.transition!, m.obs_model, m.obs_function, m.t0_index, y, prior)
 end
 
 ## dummy obs function - MAKE PUBLIC
@@ -14,8 +14,8 @@ end
 
 ## gen transition fn - MAKE PUBLIC
 function generate_trans_fn(tm::Array{Int64})
-    function fnt(et::Int64)
-        return tm[et, :]
+    function fnt(pop::Array{Int64}, et::Int64)
+        pop .+= tm[et, :]
     end
     return fnt
 end

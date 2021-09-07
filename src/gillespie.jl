@@ -11,7 +11,7 @@ function iterate_particle!(p::Particle, model::HiddenMarkovModel, time::Float64,
         time -= log(rand()) / cum_rates[end]
         time > y.time && break                  # break if max time exceeded
         et = choose_event(cum_rates)            # else choose event type (init as final event)
-        p.final_condition .+= model.fn_transition(et)  # update population
+        model.transition!(p.final_condition, et)# update population
         push!(p.trajectory, Event(time, et))    # add event to sequence
         if length(p.trajectory) > MAX_TRAJ      # HACK
             p.log_like[1] = -Inf
@@ -34,7 +34,7 @@ function iterate_particle!(p::Particle, pop_v::Array{Array{Int64},1}, model::Hid
         time -= log(rand()) / cum_rates[end]
         time > y.time && break                  # break if max time exceeded
         et = choose_event(cum_rates)            # else choose event type (init as final event)
-        p.final_condition .+= model.fn_transition(et)  # update population
+        model.transition!(p.final_condition, et)# update population
         push!(p.trajectory, Event(time, et))    # add event to sequence
         push!(pop_v, copy(p.final_condition))
     end
@@ -59,7 +59,7 @@ end
 function gillespie_sim(model::HiddenMarkovModel, theta::Array{Float64, 1}, observe::Bool) #, y::Observations
     # initialise some things
     y = deepcopy(model.obs_data)
-    ic = model.fn_initial_state(theta)
+    ic = model.initial_state(theta)
     p = Particle(theta, ic, copy(ic), Event[], Distributions.logpdf(model.prior, theta), zeros(2))
     pop_v = Array{Int64}[]
     t = model.t0_index == 0 ? 0.0 : theta[model.t0_index]
@@ -107,7 +107,7 @@ end
 function gillespie_scenario(model::HiddenMarkovModel, theta::Array{Float64, 1}; tmax::Float64 = 720.0, ifn_y::Int64 = 0)
     ## initialise some things
     y = init_obs()
-    ic = model.fn_initial_state(theta)
+    ic = model.initial_state(theta)
     p = Particle(theta, ic, copy(ic), Event[], [model.fn_log_prior(theta), 0.0])
     pop_v = Array{Int64}[]
     t = model.t0_index == 0 ? 0.0 : theta[model.t0_index]

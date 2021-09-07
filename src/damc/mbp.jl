@@ -22,7 +22,8 @@ function iterate_mbp!(xf, pop_i::Array{Int64}, model::HiddenMarkovModel, obs_i::
             time -= log(rand()) / lambda_d[end]
             time > tmax && break                    # break if event time exceeded
             et = choose_event(lambda_d)             # else choose event type (init as final event)
-            xf.final_condition .+= model.fn_transition(et)
+            # xf.final_condition .+= model.fn_transition(et, xf.final_condition)
+            model.transition!(xf.final_condition, et)
             push!(xf.trajectory, Event(time, et))   # add event to trajectory
         end
         ## handle event
@@ -33,9 +34,11 @@ function iterate_mbp!(xf, pop_i::Array{Int64}, model::HiddenMarkovModel, obs_i::
         prob_keep = lambda_f[et] / lambda_i[et]
         if (prob_keep > 1.0 || prob_keep > rand())
             push!(xf.trajectory, Event(time, et))
-            xf.final_condition .+= model.fn_transition(et)
+            # xf.final_condition .+= model.fn_transition(et, xf.final_condition)
+            model.transition!(xf.final_condition, et)
         end
-        pop_i .+= model.fn_transition(et)
+        # pop_i .+= model.fn_transition(et, pop_i)
+        model.transition!(pop_i, et)
         evt_i += 1
     end
     return evt_i
@@ -61,7 +64,8 @@ function initialise_trajectory!(xf, pop_i::Array{Int64}, model::HiddenMarkovMode
                 t > xi.theta[model.t0_index] && break           # break if prev t0 time exceeded
                 et = choose_event(lambda_f)                     # else choose event type (init as final event)
                 push!(xf.trajectory, Event(t, et))              # add event to trajectory
-                xf.final_condition .+= model.fn_transition(et)  # update population
+                # xf.final_condition .+= model.fn_transition(et, xf.final_condition)  # update population
+                model.transition!(xf.final_condition, et)       # update population
                 length(xf.trajectory) > MAX_TRAJ && (return evt_i)
             end
         else
@@ -69,7 +73,7 @@ function initialise_trajectory!(xf, pop_i::Array{Int64}, model::HiddenMarkovMode
             while true
                 evt_i > length(xi.trajectory) && break
                 xi.trajectory[evt_i].time > xf.theta[model.t0_index] && break
-                pop_i .+= model.fn_transition(xi.trajectory[evt_i].event_type)  # update population
+                model.transition!(pop_i, xi.trajectory[evt_i].event_type)  # update population
                 evt_i += 1                                                      # iterate event counter
             end
         end

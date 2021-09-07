@@ -23,7 +23,8 @@ function iterate_particles!(pop::Array{Int64,2}, cum_weight::Array{Float64,1}, m
             time -= log(rand()) / cum_rates[end]
             time > tmax && break                # break if max time exceeded
             # else choose event type and update population
-            ptemp .+= model.fn_transition(choose_event(cum_rates))
+            # ptemp .+= model.fn_transition(choose_event(cum_rates))
+            model.transition!(ptemp, choose_event(cum_rates))
         end
         # update likelihood
         total_weight += exp(model.obs_model(model.obs_data[obs_i], ptemp, parameters))
@@ -40,7 +41,7 @@ function partial_log_likelihood!(pop::Array{Int64,2}, model::HiddenMarkovModel, 
     ## initialise population matrix
     if ymin == 1
         for i in 1:size(pop, 1)
-            pop[i,:] .= model.fn_initial_state(parameters)
+            pop[i,:] .= model.initial_state(parameters)
         end
         t_prev = model.t0_index == 0 ? 0.0 : parameters[model.t0_index]
     else

@@ -10,10 +10,9 @@ A `mutable struct` which represents a DSSCT model (see [Models](@ref) for furthe
 **Fields**
 - `name`                -- string, e,g, `"SIR"`.
 - `n_events`            -- number of distinct event types.
-- `rate_function`       -- event rate function.
-- `fn_initial_state`    -- function for sampling initial model state.
-- `initial_condition`   -- initial condition.
-- `m_transition`        -- transition matrix.
+- `event_rates!`        -- event rate function.
+- `initial_state`       -- function for sampling initial model (i.e. population) state.
+- `transition!`         -- transition function of form f!(population, event_type).
 - `obs_model`           -- observation model likelihood function.
 - `obs_function`        -- observation function, use this to add 'noise' to simulated observations.
 - `t0_index`            -- index of the parameter that represents the initial time. `0` if fixed at `0.0`.
@@ -22,9 +21,9 @@ A `mutable struct` which represents a DSSCT model (see [Models](@ref) for furthe
 mutable struct DPOMPModel
     name::String                        # model name
     n_events::Int64                     # number of event types
-    rate_function::Function             # computes event rates (in place)
-    fn_initial_state::Function          # aka initial condition
-    fn_transition::Function             # i.e adjusts the population according to event type
+    event_rates!::Function              # computes event rates (in place)
+    initial_state::Function             # aka initial condition
+    transition!::Function               # i.e adjusts the population according to event type
     obs_model::Function                 # observation model (log likelihood)
     obs_function::Function              # observation function (sim only) - TO BE REMOVED (-> sim param)
     t0_index::Int64                     # == 0 if initial time known
@@ -36,8 +35,8 @@ struct HiddenMarkovModel{RFT<:Function, ICT<:Function, TFT<:Function, OFT<:Funct
     name::String                        # model name
     n_events::Int64                     # number of event types
     rate_function::RFT                  # computes event rates (in place)
-    fn_initial_state::ICT               # aka initial condition
-    fn_transition::TFT                  # i.e adjusts the population according to event type
+    initial_state::ICT               # aka initial condition
+    transition!::TFT                    # adjusts the population according to event type
     obs_model::OMT                      # observation model (log likelihood)
     obs_function::OFT                   # observation function (sim only) - TO BE REMOVED (-> sim param)
     t0_index::Int64                     # == 0 if initial time known

@@ -27,7 +27,7 @@ function get_model()
     RECOVER = 3
     BIRTH_DEATH = 4
     # - rate function
-    function seird_rf(output, parameters::Array{Float64, 1}, population::Array{Int64, 1})
+    function seird_rf(output, parameters::Vector{Float64}, population::Vector{Int64})
         output[1] = parameters[CONTACT] * population[SUSCEPTIBLE] * population[INFECTIOUS] / population[ALIVE]
         output[2] = parameters[LATENCY] * population[EXPOSED]
         output[3] = parameters[RECOVER] * population[INFECTIOUS]
@@ -35,6 +35,17 @@ function get_model()
     end
     # - transition matrix and function
     tm = [-1 1 0 0 0; 0 -1 1 0 0; 0 0 -1 1 0]
-    function transition()
-        body
+    function transition!(population::Vector{Int64}, evt_type::Int64)
+        if evt_type == 4        # birth/death:
+            if rand(1:2) == 1   # birth
+                population[SUSCEPTIBLE] += 1
+            else                # death
+                # sample population`
+
+            end
+        else                    # disease model:
+            population .+= tm[evt_type, :]
+        end
     end
+
+end

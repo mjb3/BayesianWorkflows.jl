@@ -81,11 +81,11 @@ function fit_model(freq_dep::Bool)
     prior = get_prior(freq_dep)
     # - data augmented:
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
-    results = run_inference_workflow(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
+    results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
     tabulate_results(results)
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
-    results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
+    results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
     tabulate_results(results)
 end
 fit_model(false)

@@ -16,7 +16,7 @@ function run_pibis(model::HiddenMarkovModel, theta::Array{Float64, 2}, ess_rs_cr
     end
     ## initialise population matrices
     pop = Array{Array{Int64,2},1}(undef, outer_p)
-    # pop_size = length(model.fn_initial_state())
+    # pop_size = length(model.initial_state())
     pop_size = get_pop_size(model)
     for i in 1:outer_p
         pop[i] = zeros(Int64, np, pop_size)
@@ -140,7 +140,7 @@ function run_mbp_ibis(model::HiddenMarkovModel, theta::Array{Float64, 2}, ess_rs
     ptcls = Array{Particle,1}(undef, outer_p)
     # theta = copy(theta_init) # GET RID? *
     for p in eachindex(ptcls)
-        ic = model.fn_initial_state(theta[:,p])
+        ic = model.initial_state(theta[:,p])
         ptcls[p] = Particle(theta[:,p], ic, copy(ic), Event[], Distributions.logpdf(model.prior, theta[:,p]), zeros(2))
     end
     ## resampling workspace

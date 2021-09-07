@@ -26,7 +26,7 @@ function get_model()
     RECOVER = 3
     MORTALITY = 4
     # - rate function
-    function seird_rf(output, parameters::Array{Float64, 1}, population::Array{Int64, 1})
+    function seird_rf(output, parameters::Vector{Float64}, population::Array{Int64, 1})
         output[1] = parameters[CONTACT] * population[SUSCEPTIBLE] * population[INFECTIOUS]
         output[2] = 1 / parameters[ASYMPT] * population[EXPOSED]
         output[3] = 1 / parameters[RECOVER] * population[INFECTIOUS]
@@ -36,9 +36,9 @@ function get_model()
     tm = [-1 1 0 0 0; 0 -1 1 0 0; 0 0 -1 1 0; 0 0 -1 0 1]
     fnt = BayesianWorkflows.generate_trans_fn(tm)
     # - initial condition
-    fnic() = [1000, 0, 10, 0, 0]
+    fnic(parameters::Vector{Float64}) = [1000, 0, 10, 0, 0]
     # - observation function
-    function obs_fn!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Array{Float64,1})
+    function obs_fn!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64 })
         di = Distributions.Binomial(population[INFECTIOUS], PROB_DETECTION_I)
         dd = Distributions.Binomial(population[DEATH], PROB_DETECTION_I)
         y.val[OBSERVED_STATES] .= [rand(di), rand(dd)]
@@ -72,7 +72,7 @@ function single_model_inference()
     ub = [0.1, 1.0, 1.0, 0.01]
     prior = Distributions.Product(Distributions.Uniform.(zeros(4), ub))
     ## run analysis
-    results = BayesianWorkflows.run_inference_workflow(model, prior, y)
+    results = BayesianWorkflows.run_inference_analysis(model, prior, y)
     BayesianWorkflows.tabulate_results(results)
 end
 
