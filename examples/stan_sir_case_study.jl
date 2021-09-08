@@ -39,7 +39,7 @@ function get_model(freq_dep::Bool)
     ## statistical model (or 'observation' model in the context of DPOMPs)
     OBS_BEDRIDDEN = 1
     OBS_CONV = 2
-    function obs_model(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Array{Float64,1})
+    function obs_loglike(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Array{Float64,1})
         try
             population[STATE_I] == y.val[OBS_BEDRIDDEN] == 0 && (return 0.0)
             population[STATE_I] < y.val[OBS_BEDRIDDEN] && (return -Inf)
@@ -50,9 +50,9 @@ function get_model(freq_dep::Bool)
             throw(e)
         end
     end
-    model.obs_model = obs_model
+    model.obs_loglike = obs_loglike
     ## for sampling y
-    function obs_fn!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64})
+    function obs_sample!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64})
         if population[STATE_I] > 0
             obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
             y.val[OBS_BEDRIDDEN] = max(rand(obs_dist), population_size)
@@ -61,7 +61,7 @@ function get_model(freq_dep::Bool)
         end
         y.val[OBS_CONV] = population[STATE_R]
     end
-    model.obs_function = obs_fn!
+    model.obs_function = obs_sample!
     return model
 end
 
@@ -101,10 +101,12 @@ function fit_model(freq_dep::Bool)
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
     da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
     tabulate_results(da_results)
+    save_to_file(da_results, "out/da/")
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
     smc_results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
     tabulate_results(smc_results)
+    save_to_file(da_results, "out/smc/")
     ## return as named tuple
     return (da_results = da_results, smc_results = smc_results)
 end

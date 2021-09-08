@@ -126,3 +126,12 @@ function save_to_file(results::MCMCSample, dpath::String)
     # print rejection/re samples
     print_rej_sample(results.samples, dpath, results.psrf)
 end
+
+# - single model results
+function save_to_file(results::SingleModelResults, dpath::String)
+    # check dir
+    isdir(dpath) || mkpath(dpath)
+    # print
+    save_to_file(results.ibis, string(dpath, "ibis/"))
+    save_to_file(results.mcmc, string(dpath, "mcmc/"))
+end
