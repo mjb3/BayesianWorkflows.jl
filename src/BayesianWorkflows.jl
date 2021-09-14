@@ -24,6 +24,7 @@ const C_ALG_NM_ARQ = "ARQ"
 const MAX_TRAJ = 196000
 
 ## MCMC defaults
+const C_DF_MCMC_CHAINS = 4
 const C_DF_MCMC_STEPS = 50000
 const C_DF_MCMC_ADAPT = 0.2
 const C_MCMC_ADAPT_INTERVALS = 10
@@ -70,7 +71,8 @@ end
 ## workflows
 # - single model workflow
 function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1};
-    primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_interval=nothing)
+    primary=C_ALG_NM_SMC2, n_particles=(primary==C_ALG_NM_SMC2 ? C_DF_SMC2_P : C_DF_MBPI_P),
+    validation=C_ALG_NM_MBPM, n_val_chains=C_DF_MCMC_CHAINS, n_val_steps=C_DF_MCMC_STEPS, sample_interval=nothing)
 
     ## type conversion
     get_type_vals(x) = [getfield(x, v) for v in fieldnames(typeof(x))]
@@ -81,9 +83,9 @@ function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribu
     end
     ## primary analysis (ibis)
     if primary == C_ALG_NM_SMC2
-        ibis = run_smc2_analysis(model, prior, obs_data)
+        ibis = run_smc2_analysis(model, prior, obs_data; np=n_particles)
     elseif primary == C_ALG_NM_MBPI
-        ibis = run_mbp_ibis_analysis(model, prior, obs_data)
+        ibis = run_mbp_ibis_analysis(model, prior, obs_data; np=n_particles)
     else
         ibis = nothing
         msg = string("Algorithm '", primary, "' not recognised. Valid values are: ", (C_ALG_NM_SMC2, C_ALG_NM_MBPI))
@@ -91,10 +93,10 @@ function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribu
     end
     ## secondary analysis (mcmc)
     if validation == C_ALG_NM_MBPM
-        mcmc = run_mcmc_analysis(model, prior, obs_data)
+        mcmc = run_mcmc_analysis(model, prior, obs_data; n_chains=n_val_chains, steps=n_val_steps)
     elseif validation == C_ALG_NM_ARQ
         @assert typeof(sample_interval) == Array{Float64, 1}
-        mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval)
+        mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval; n_chains=n_val_chains, steps=n_val_steps)
         # mcmc = get_mcmc_sample(mcmc.rej_sample)
     else
         mcmc = nothing

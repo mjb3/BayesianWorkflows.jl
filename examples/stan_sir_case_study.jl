@@ -43,8 +43,9 @@ function get_model(freq_dep::Bool)
         try
             population[STATE_I] == y.val[OBS_BEDRIDDEN] == 0 && (return 0.0)
             population[STATE_I] < y.val[OBS_BEDRIDDEN] && (return -Inf)
-            obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
-            return logpdf(obs_dist, y.val[OBS_BEDRIDDEN])
+            # dist = Truncated(NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1), 0, population_size)
+            dist = Binomial(population[STATE_I], parameters[PRM_PHI])
+            return logpdf(dist, y.val[OBS_BEDRIDDEN])
         catch e
             println("y: ", y, "\n pop:", population, "\n prm: ", parameters)
             throw(e)
@@ -54,8 +55,9 @@ function get_model(freq_dep::Bool)
     ## for sampling y
     function obs_sample!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64})
         if population[STATE_I] > 0
-            obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
-            y.val[OBS_BEDRIDDEN] = max(rand(obs_dist), population_size)
+            # dist = Truncated(NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1), 0, population_size)
+            dist = Binomial(population[STATE_I], parameters[PRM_PHI])
+            y.val[OBS_BEDRIDDEN] = rand(dist)
         else
             y.val[OBS_BEDRIDDEN] = 0
         end
@@ -80,12 +82,13 @@ function get_prior(freq_dep::Bool)
     beta_p = freq_dep ? [2.0, 1.0] : [2.0, 1.0] / population_size
     pr_beta = Truncated(Normal(beta_p...), 0.0, Inf)
     pr_lambda = Truncated(Normal(0.4, 0.5), 0.0, Inf)
-    phi_inv = Truncated(Exponential(5.0), 1.0, Inf)
+    # phi = Truncated(Exponential(5.0), 1.0, Inf)
+    phi = Uniform(0.4, 1.0)
     t0_lim = ["1978-01-16", "1978-01-22"]
     t0_values = Dates.value.(Dates.Date.(t0_lim, "yyyy-mm-dd"))
     freq_dep && println("NB. t0 mapping: ", t0_lim, " := ", t0_values)
     t0 = Uniform(t0_values...)
-    return Product([pr_beta, pr_lambda, phi_inv, t0])
+    return Product([pr_beta, pr_lambda, phi, t0])
 end
 
 ##  sampling interval for ARQMCMC algoritm:
