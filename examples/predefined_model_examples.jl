@@ -23,19 +23,19 @@ println(plot_trajectory(x))			# plot (optional)
 #### BAYESIAN INFERENCE WORKFLOWS ####
 sample_interval = [0.0005, 0.02]    # intervals used for ARQ algorithm
 
-## single model workflow
+## single model analysis
 function parameter_inference_example()
-    println("\n-- RUNNING SINGLE-MODEL INFERENCE WORKFLOW --")
+    println("\n-- RUNNING SINGLE-MODEL INFERENCE ANALYSIS --")
     results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
     tabulate_results(results)
 end
 
-## model comparison workflow
+## model comparison analysis
 function model_comparison_example()
-    println("\n-- RUNNING MULTI-MODEL INFERENCE WORKFLOW --")
+    println("\n-- RUNNING MULTI-MODEL INFERENCE ANALYSIS --")
     # define alternative model
     seis_model = generate_model("SEIS", [100, 0, 1])
-    seis_model.obs_model = partial_gaussian_obs_model(2.0, seq = 3, y_seq = 2)
+    seis_model.obs_loglike = partial_gaussian_obs_model(2.0, seq = 3, y_seq = 2)
     seis_prior = Distributions.Product(Distributions.Uniform.(zeros(3), [0.1,0.5,0.5]))
     # run model comparison workflow
     models::Array{DPOMPModel, 1} = [model, seis_model]

@@ -37,9 +37,9 @@ function tabulate_results(results::ARQMCMCSample; display::Bool = true)
     rj_sd = compute_sigma(results.rej_sample.samples.cv)
     is_sd = compute_sigma(results.imp_sample.cv)
     d[:,1] .= 1:length(results.imp_sample.mu)
-    d[:,2] .= round.(results.rej_sample.samples.mu; sigdigits = C_PR_SIGDIG)
+    d[:,2] .= prettify_n.(results.rej_sample.samples.mu)
     d[:,3] .= round.(rj_sd; sigdigits = C_PR_SIGDIG)
-    d[:,4] .= round.(results.imp_sample.mu; sigdigits = C_PR_SIGDIG)
+    d[:,4] .= prettify_n.(results.imp_sample.mu)
     d[:,5] .= round.(is_sd; sigdigits = C_PR_SIGDIG)
     d[:,6] .= round.(results.rej_sample.psrf[:,2]; sigdigits = C_PR_SIGDIG)
     d[:,7] .= round.(results.rej_sample.psrf[:,3]; sigdigits = C_PR_SIGDIG)
@@ -47,10 +47,10 @@ function tabulate_results(results::ARQMCMCSample; display::Bool = true)
     # bme_seq = C_DEBUG ? (1:2) : (1:1)
     # d[bme_seq,8] = round.(results.imp_sample.bme[bme_seq]; digits = 1)
     if display
-        h = ["θ", "E[θ]", ":σ", "E[f(θ)]", ":σ", "R̄", "R̄97.5"]
+        h = ["θ", "E[θ]", ":σ", "E[f(θ)]", ":σ", "R̂", "R̂97.5"]
         PrettyTables.pretty_table(d, h)
     else
-        h = ["θ", "e_x", "sd_x", "e_fx", "sd_fx", "R̄", "R̄97.5"]
+        h = ["θ", "e_x", "sd_x", "e_fx", "sd_fx", "R̂", "R̂97.5"]
         return DataFrames.DataFrame(d, h)
     end
 end

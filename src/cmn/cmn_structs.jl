@@ -122,7 +122,7 @@ The results of a single-model inference analysis.
 struct SingleModelResults
     model::DPOMPModel
     ibis::ImportanceSample
-    mcmc::MCMCSample
+    mcmc #::MCMCSample
 end
 
 ## ADD DOCS

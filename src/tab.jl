@@ -1,27 +1,19 @@
 #### tabulate stuff ####
-function prettify_n(n::Float64, sigdigs=C_PR_SIGDIG)
-    if n < 1
-        return round(n; sigdigits = sigdigs)
-    else
-        return round(n; digits = 1)
-    end
-end
+
 
 ## results summary
 #- `proposals`   -- display proposal analysis (MCMC only).
 """
-    tabulate_results(results)
+    tabulate_results(results; [null_index = 1], [display=true])
 
 Display the results of an inference analysis.
 
-The main parameter is `results` -- a data structure of type `MCMCSample`, `ImportanceSample`, `ARQMCMCSample` or `ModelComparisonResults`. When invoking the latter, the named parameter `null_index = 1` by default but can be overridden. This determines the 'null' model, used to compute the Bayes factor.
+The main parameter is `results` -- a data structure of type `MCMCSample`, `ImportanceSample`, `ARQMCMCSample` or `ModelComparisonResults`. When invoking the latter, the named parameter `null_index = 1` by default but can be overridden. This determines the 'null' model, used to compute the Bayes factor. The `display` flag can be set `=false` to return a single DataFrame for valid types.
 """
-function tabulate_results(results::MCMCSample)
+function tabulate_results(results::MCMCSample; display=true)
     ## proposals
     # proposals && tabulate_proposals(results)
     ## samples
-    # println("MCMC results:")
-    h = ["θ", "E[θ]", ":σ", "R̄", "R̄97.5"]
     d = Matrix(undef, length(results.samples.mu), 5)
     sd = compute_sigma(results.samples.cv)
     d[:,1] .= 1:length(results.samples.mu)
@@ -29,11 +21,17 @@ function tabulate_results(results::MCMCSample)
     d[:,3] .= round.(sd; sigdigits = C_PR_SIGDIG)
     d[:,4] .= round.(results.psrf[:,2]; sigdigits = C_PR_SIGDIG + 1)
     d[:,5] .= round.(results.psrf[:,3]; sigdigits = C_PR_SIGDIG + 1)
-    PrettyTables.pretty_table(d, h)
+    if display
+        h = ["θ", "E[θ]", ":σ", "R̂", "R̂97.5"]
+        PrettyTables.pretty_table(d, h)
+    else
+        h = ["x", "e_x", "sd_x", "R̂", "R̂97.5"]
+        return DataFrames.DataFrame(d, h)
+    end
 end
 
 ## importance sample:
-function tabulate_results(results::ImportanceSample)
+function tabulate_results(results::ImportanceSample; display=true)
     ## samples
     # println("IBIS results:")
     h = ["θ", "E[θ]", ":σ", C_LBL_BME]
@@ -45,11 +43,17 @@ function tabulate_results(results::ImportanceSample)
     d[:,4] .= 0
     bme_seq = C_DEBUG ? (1:2) : (1:1)
     d[bme_seq, 4] = round.(results.bme[bme_seq]; digits = 1)
-    PrettyTables.pretty_table(d, h)
+    if display
+        h = ["θ", "E[θ]", ":σ", C_LBL_BME]
+        PrettyTables.pretty_table(d, h)
+    else
+        h = ["x", "e_x", "sd_x", C_LBL_BME]
+        return DataFrames.DataFrame(d, h)
+    end
 end
 
-function tabulate_results(results::ARQMCMCSample)
-    ARQMCMC.tabulate_results(results)
+function tabulate_results(results::ARQMCMCSample; display=true)
+    ARQMCMC.tabulate_results(results; display=display)
 end
 
 function tabulate_results(results::SingleModelResults)

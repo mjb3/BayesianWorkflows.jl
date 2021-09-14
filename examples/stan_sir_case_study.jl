@@ -10,7 +10,7 @@ import CSV
 import DataFrames
 import Dates
 
-Random.seed!(2)
+Random.seed!(0)
 
 ## constants
 population_size = 763
@@ -83,7 +83,7 @@ function get_prior(freq_dep::Bool)
     phi_inv = Truncated(Exponential(5.0), 1.0, Inf)
     t0_lim = ["1978-01-16", "1978-01-22"]
     t0_values = Dates.value.(Dates.Date.(t0_lim, "yyyy-mm-dd"))
-    println("t0 mapping: ", t0_lim, " := ", t0_values)
+    freq_dep && println("NB. t0 mapping: ", t0_lim, " := ", t0_values)
     t0 = Uniform(t0_values...)
     return Product([pr_beta, pr_lambda, phi_inv, t0])
 end
@@ -100,13 +100,15 @@ function fit_model(freq_dep::Bool)
     # - data augmented:
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
     da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
+    # println("da_results MC TYPE: ", typeof(da_results.mcmc))
     tabulate_results(da_results)
     save_to_file(da_results, "out/flu/da/")
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
     smc_results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
+    # println("smc_results MC TYPE: ", typeof(smc_results.mcmc))
     tabulate_results(smc_results)
-    save_to_file(da_results, "out/flu/smc/")
+    save_to_file(smc_results, "out/flu/smc/")
     ## return as named tuple
     return (da_results = da_results, smc_results = smc_results)
 end
@@ -114,6 +116,7 @@ end
 ## model comparison
 # - compare density vs. frequency dependent model
 function model_comparison()
+    println("\n---- ---- ---- ---- MODEL INFERENCE ---- ---- ---- ----")
     models = get_model.([false, true])
     priors = get_prior.([false, true])
     sample_intervals = sample_interval.([false, true])

@@ -95,13 +95,13 @@ function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribu
     elseif validation == C_ALG_NM_ARQ
         @assert typeof(sample_interval) == Array{Float64, 1}
         mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval)
-        mcmc = get_mcmc_sample(mcmc.rej_sample)
+        # mcmc = get_mcmc_sample(mcmc.rej_sample)
     else
         mcmc = nothing
         msg = string("Validation algorithm '", validation, "' not recognised. Valid values are: ", (C_ALG_NM_MBPM, C_ALG_NM_ARQ))
         throw(AlgorithmException(msg))
     end
-    println("- single model workflow complete.")
+    println("- ", model.name, " model analysis complete.")
     return SingleModelResults(model, ibis, mcmc)
 end
 # - multi model
@@ -119,7 +119,7 @@ function run_inference_analysis(models::Array{DPOMPModel,1}, priors::Array{Distr
             primary=primary, validation=validation, sample_interval=si)
         push!(output, r)
     end
-    println("- multi model workflow complete.")
+    println("- model comparison workflow complete.")
     return output
 end
 # - alternative mask

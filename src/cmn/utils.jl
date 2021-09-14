@@ -1,5 +1,14 @@
 #### print samples ####
 
+## for results tabulation
+function prettify_n(n::Float64, sigdigs=C_PR_SIGDIG)
+    if n < 1
+        return round(n; sigdigits = sigdigs)
+    else
+        return round(n; digits = 1)
+    end
+end
+
 ## print theta summary (internal use)
 function print_sample_summary(results, dpath::String)
     # print theta summary

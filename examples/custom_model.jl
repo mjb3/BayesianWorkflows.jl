@@ -43,13 +43,13 @@ function get_model()
         dd = Distributions.Binomial(population[DEATH], PROB_DETECTION_D)
         y.val[OBSERVED_STATES] .= [rand(di), rand(dd)]
     end
-    # - observation model
-    function obs_model(y::BayesianWorkflows.Observation, population::Array{Int64,1}, theta::Array{Float64,1})
+    # - [log] observation model
+    function obs_loglike(y::BayesianWorkflows.Observation, population::Array{Int64,1}, theta::Array{Float64,1})
         d = Distributions.Binomial.(population[OBSERVED_STATES], [PROB_DETECTION_I, PROB_DETECTION_D])
         return Distributions.logpdf(Distributions.Product(d), y.val[OBSERVED_STATES])
     end
     # - construct model and return
-    return BayesianWorkflows.DPOMPModel(MODEL_NAME, N_EVENT_TYPES, seird_rf, fnic, fnt, obs_model, obs_fn!, T_ZERO)
+    return BayesianWorkflows.DPOMPModel(MODEL_NAME, N_EVENT_TYPES, seird_rf, fnic, fnt, obs_loglike, obs_fn!, T_ZERO)
 end
 
 ## simulate and return some 'observations'
