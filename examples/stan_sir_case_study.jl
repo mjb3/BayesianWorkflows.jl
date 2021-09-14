@@ -101,12 +101,12 @@ function fit_model(freq_dep::Bool)
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
     da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
     tabulate_results(da_results)
-    save_to_file(da_results, "out/da/")
+    save_to_file(da_results, "out/flu/da/")
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
     smc_results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
     tabulate_results(smc_results)
-    save_to_file(da_results, "out/smc/")
+    save_to_file(da_results, "out/flu/smc/")
     ## return as named tuple
     return (da_results = da_results, smc_results = smc_results)
 end

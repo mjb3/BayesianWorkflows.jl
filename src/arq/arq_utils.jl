@@ -47,10 +47,10 @@ function tabulate_results(results::ARQMCMCSample; display::Bool = true)
     # bme_seq = C_DEBUG ? (1:2) : (1:1)
     # d[bme_seq,8] = round.(results.imp_sample.bme[bme_seq]; digits = 1)
     if display
-        h = ["θ", "E[θ]", ":σ", "E[f(θ)]", ":σ", "PSRF", "PSRF975"]
+        h = ["θ", "E[θ]", ":σ", "E[f(θ)]", ":σ", "R̄", "R̄97.5"]
         PrettyTables.pretty_table(d, h)
     else
-        h = ["θ", "e_x", "sd_x", "e_fx", "sd_fx", "PSRF", "PSRF975"]
+        h = ["θ", "e_x", "sd_x", "e_fx", "sd_fx", "R̄", "R̄97.5"]
         return DataFrames.DataFrame(d, h)
     end
 end

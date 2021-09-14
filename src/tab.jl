@@ -21,7 +21,7 @@ function tabulate_results(results::MCMCSample)
     # proposals && tabulate_proposals(results)
     ## samples
     # println("MCMC results:")
-    h = ["θ", "E[θ]", ":σ", "PSRF", "PSRF975"]
+    h = ["θ", "E[θ]", ":σ", "R̄", "R̄97.5"]
     d = Matrix(undef, length(results.samples.mu), 5)
     sd = compute_sigma(results.samples.cv)
     d[:,1] .= 1:length(results.samples.mu)
