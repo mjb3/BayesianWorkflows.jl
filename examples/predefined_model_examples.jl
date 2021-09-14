@@ -28,6 +28,13 @@ function parameter_inference_example()
     println("\n-- RUNNING SINGLE-MODEL INFERENCE ANALYSIS --")
     results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval)
     tabulate_results(results)
+    ## posterior predictive check
+    println("\n-- POSTERIOR PREDICTIVE CHECK:")
+    parameters = resample(results; n = 10)
+    x = gillespie_sim(model, parameters)
+    println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
+    println(plot_observations(x; plot_index=2))
+    println(plot_observation_quantiles(x; plot_index=2))
 end
 
 ## model comparison analysis

@@ -111,3 +111,16 @@ function save_to_file(results::SimResults, dpath::String)
         end
     end # end of print observations
 end
+
+## save n simulation results to file
+function save_to_file(results::Vector{SimResults}, dpath::String)
+    dp = string.(dpath, 1:length(results), "/")
+    println("SAVING TO ", dp)
+    # check dir
+    isdir(dpath) || mkpath(dpath)
+    # print metadata
+    open(string(dpath, "metadata.csv"), "w") do f
+        write(f, "n\n$(length(results))")
+    end
+    save_to_file.(results, dp)
+end

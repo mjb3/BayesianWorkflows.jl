@@ -27,7 +27,48 @@ function plot_trajectory(x::SimResults; plot_index=collect(1:length(x.particle.i
     return p
 end
 
-## observations data
+#### observations data
+max_obs(observations::Vector{Vector{Observation}}, val_index::Int64) = maximum([observations[i][j].val[val_index] for i in eachindex(observations) for j in eachindex(observations[i])])
+
+## compute quantiles
+function get_observation_quantiles(observations::Vector{Vector{Observation}}, val_index::Int64, quantiles::Vector{Float64})
+    # t = [y.time for y in each(observations[1])]
+    output = zeros(length(observations[1]), length(quantiles))
+    for i in eachindex(observations[1])
+        y = [yy[i].val[val_index] for yy in observations]
+        println(" y", i, ": ", y)
+        output[i, :] .= Statistics.quantile!(y, quantiles)
+    end
+    println("predict: ", output)
+    return output
+end
+
+## plot quantiles
+C_PLT_OBS_QT_TTL = "Observation quantiles:\n"
+"""
+    plot_observation_quantiles(x; plot_index=1, quantiles=[0.25, 0.5, 0.75])
+
+Plot perecentile range for a common set of observation data sets using [UnicodePlots.jl](https://github.com/Evizero/UnicodePlots.jl).
+
+The only input parameter required is a `Vector` of type `SimResults` (or `Vector{Observation}`), i.e. from a call to `gillespie_sim`. The first observation value is plotted by default, but another can be specified by passing an integer to the `plot_index` option.
+"""
+function plot_observation_quantiles(observations::Vector{Vector{Observation}}; plot_index::Int64=1, quantiles::Vector{Float64}=[0.25, 0.5, 0.75], title::String=string(C_PLT_OBS_QT_TTL, quantiles))
+    mx = max_obs(observations, plot_index)
+    y = get_observation_quantiles(observations, plot_index, quantiles)
+    t1 = [y.time for y in observations[1]]
+    p = UnicodePlots.lineplot(t1, y[:,1], ylim = [0, mx + 1], title=title, name=quantiles[1])
+    for i in 2:length(quantiles)
+        # t = [y.time for y in observations[i]]
+        UnicodePlots.lineplot!(p, t1, y[:,i], name=quantiles[i])
+    end
+    return p
+end
+# - vector of simulation trajectories
+function plot_observation_quantiles(x::Vector{SimResults}; plot_index::Int64=1, quantiles::Vector{Float64}=[0.25, 0.5, 0.75], title::String=string(C_PLT_OBS_QT_TTL, quantiles))
+    y = [xx.observations for xx in x]
+    return plot_observation_quantiles(y; plot_index=plot_index, quantiles=quantiles, title=title)
+end
+
 C_PLT_OBS_TTL = "Observation trajectory"
 """
     plot_observations(x; plot_index=1)
@@ -37,7 +78,8 @@ Plot the trajectory of observation values for one or more [simulated or real] da
 The only input parameter required is `x` of type `SimResults`, i.e. from a call to `gillespie_sim`. The first observation value is plotted by default, but another can be specified by passing an integer to the `plot_index` option.
 """
 function plot_observations(observations::Vector{Vector{Observation}}; plot_index=1, date_type=Float64, title=C_PLT_OBS_TTL)
-    mx = maximum([observations[i][j].val[plot_index] for i in eachindex(observations) for j in eachindex(observations[i])])
+    mx = max_obs(observations, plot_index)
+    # mx = maximum([observations[i][j].val[plot_index] for i in eachindex(observations) for j in eachindex(observations[i])])
     ## plot
     t1 = [observations[1][i].time for i in eachindex(observations[1])]
     y1 = [observations[1][i].val[plot_index] for i in eachindex(observations[1])]

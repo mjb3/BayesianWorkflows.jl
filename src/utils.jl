@@ -39,50 +39,6 @@ function resample(sample::SingleModelResults; n::Int64 = C_DFT_N_RESAMPLES)
     return resample(sample.ibis; n=n)
 end
 
-#### other printing ####
-
-## save simulation results to file REPL BY save_to_file
-# NEED TO ADJUST FOR 2D POPULATIONS *************
-# function print_sim_results(results::SimResults, dpath::String)
-#     #model::HiddenMarkovModel,
-#     # check dir
-#     isdir(dpath) || mkpath(dpath)
-#     # print sequence
-#     open(string(dpath, "sim.csv"), "w") do f
-#         # print headers
-#         write(f, "time, event")
-#         for p in 1:size(results.population, 2)
-#             write(f, ",$p")
-#         end
-#         # print event sequence
-#         for i in eachindex(results.particle.trajectory)
-#             tm = results.particle.trajectory[i].time
-#             tp = results.particle.trajectory[i].event_type
-#             write(f, "\n$tm,$tp")
-#             for p in 1:size(results.population, 2)
-#                 write(f, ",$(results.population[i,p])")
-#             end
-#         end
-#     end # end of print sequence
-#     # print observation
-#     open(string(dpath, "obs.csv"), "w") do f
-#         # print headers
-#         write(f, "time,id")
-#         for p in eachindex(results.observations[1].val)
-#             # c = model.model_name[p]
-#             write(f, ",$p")
-#         end
-#         # print event sequence
-#         for i in eachindex(results.observations)
-#             write(f, "\n$(results.observations[i].time),$(results.observations[i].obs_id)")
-#             tp = results.observations[i].val
-#             for p in eachindex(tp)
-#                 write(f, ",$(tp[p])")
-#             end
-#         end
-#     end # end of print observations
-# end
-
 #### print samples ####
 
 ## move this ********

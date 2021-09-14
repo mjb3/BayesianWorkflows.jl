@@ -150,7 +150,7 @@ export partial_gaussian_obs_model
 export gillespie_sim
 export get_observations
 export tabulate_results, save_to_file, resample
-export plot_trajectory, plot_observations
+export plot_trajectory, plot_observations, plot_observation_quantiles
 export plot_parameter_trace, plot_parameter_heatmap, plot_parameter_marginal
 export run_inference_analysis
 export plot_model_comparison
