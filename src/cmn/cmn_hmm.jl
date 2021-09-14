@@ -12,10 +12,8 @@ function get_observation_quantiles(observations::Vector{Vector{Observation}}, va
     output = zeros(length(observations[1]), length(quantiles))
     for i in eachindex(observations[1])
         y = [yy[i].val[val_index] for yy in observations]
-        println(" y", i, ": ", y)
         output[i, :] .= Statistics.quantile!(y, quantiles)
     end
-    println("predict: ", output)
     return ObservationQuantiles(t1, output, quantiles)
 end
 
@@ -74,13 +72,13 @@ function get_observations(df::DataFrames.DataFrame; time_col=1, type_col=0, val_
     else
         dts = df[:,time_col]
     end
-    # println("df[:,time_col]: ", typeof(df[:,time_col]), "\n", df[:,time_col])
-    # println("\ndts: ", typeof(dts), "\n", dts)
     ## populate output
     obs = Observation[]
     for i in 1:size(df,1)
-        obs_type = type_col==0 ? 1 : df[i,type_col]
-        push!(obs, Observation(dts[i], obs_type, 1.0, df[i,val_seq]))
+        obs_type::Int64 = type_col==0 ? 1 : df[i,type_col]
+        v = zeros(Int64, length(val_seq))
+        v .= values(df[i, val_seq])
+        push!(obs, Observation(dts[i], obs_type, 1.0, v))
     end
     sort!(obs)
     return obs
@@ -161,7 +159,7 @@ function save_to_file(results::Vector{SimResults}, dpath::String; obs_quantiles:
     end
     # quantiles
     # NB. expand for all observed val ****
-    y = [xx.observations for xx in x]
+    y = [x.observations for x in results]
     y1 = get_observation_quantiles(y, 1, obs_quantiles)
     save_to_file(y1, string(dp, "y1.csv"))
     # sims

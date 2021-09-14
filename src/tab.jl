@@ -23,7 +23,7 @@ function tabulate_results(results::MCMCSample; display=true)
     d[:,5] .= round.(results.psrf[:,3]; sigdigits = C_PR_SIGDIG + 1)
     if display
         h = ["θ", "E[θ]", ":σ", "R̂", "R̂97.5"]
-        PrettyTables.pretty_table(d, h)
+        PrettyTables.pretty_table(d; header=h)
     else
         h = ["x", "e_x", "sd_x", "R̂", "R̂97.5"]
         return DataFrames.DataFrame(d, h)
@@ -45,7 +45,7 @@ function tabulate_results(results::ImportanceSample; display=true)
     d[bme_seq, 4] = round.(results.bme[bme_seq]; digits = 1)
     if display
         h = ["θ", "E[θ]", ":σ", C_LBL_BME]
-        PrettyTables.pretty_table(d, h)
+        PrettyTables.pretty_table(d; header=h)
     else
         h = ["x", "e_x", "sd_x", C_LBL_BME]
         return DataFrames.DataFrame(d, h)
@@ -80,5 +80,5 @@ function tabulate_results(results::Array{SingleModelResults, 1}; null_index = 1)
     ml = [r.ibis.bme[1] for r in results]
     d[:,2] .= round.(ml; digits = 1)
     d[:,3] .= round.(compute_bayes_factor(ml, null_index); digits = 1)
-    PrettyTables.pretty_table(d, h)
+    PrettyTables.pretty_table(d; header=h)
 end

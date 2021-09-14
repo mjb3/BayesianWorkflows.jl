@@ -71,7 +71,7 @@ function single_model_inference()
     ub = [0.1, 1.0, 1.0, 0.01]
     prior = Distributions.Product(Distributions.Uniform.(zeros(4), ub))
     ## run analysis
-    results = BayesianWorkflows.run_inference_analysis(model, prior, y)
+    results = BayesianWorkflows.run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
     BayesianWorkflows.tabulate_results(results)
 end
 
@@ -80,3 +80,4 @@ end
 
 ## run
 single_model_inference()
+exit()

@@ -138,7 +138,7 @@ function generate_x0(model::HiddenMarkovModel, ntries = 100000)#, theta::Array{F
     end
     ## ADD PROPER ERR HANDLING ***
     println("\nWARNING: problem generating a valid initial trajectory for inference:\n- e.g. model parameters: ", theta)
-    println("- **ensure prior distribution is appropriate** trying another ", ntries/1000, "k runs...")
+    println("- **ensure prior distribution is appropriate**\n- trying another ", ntries/1000, "k runs...")
     return generate_x0(model, ntries)
 end
 

@@ -2,7 +2,7 @@
 
 ## for results tabulation
 function prettify_n(n::Float64, sigdigs=C_PR_SIGDIG)
-    if n < 1
+    if n < 10
         return round(n; sigdigits = sigdigs)
     else
         return round(n; digits = 1)
