@@ -86,7 +86,7 @@ function run_inner_mcmc_analysis(mdl::LikelihoodModel, da::Bool, steps::Int64, b
     mc_output = MCMCSample(rejs, burnin, sre, time_ns() - start_time)
     ## return results
     output = ARQMCMCSample(is_output, mc_output, mdl.sample_interval, mdl.sample_limit, fx, grid)
-    println("- finished in ", print_runtime(output.rej_sample.run_time), ". (Iμ = ", round.(is_output.mu; sigdigits = C_PR_SIGDIG), "; Rμ = ", round.(rejs.mu; sigdigits = C_PR_SIGDIG), "; BME = ", round.(output.imp_sample.bme[1]; sigdigits = C_PR_SIGDIG), ")")
+    println("- finished in ", print_runtime(output.rej_sample.run_time), ". (Iμ = ", prettify_n.(is_output.mu), "; Rμ = ", prettify_n.(rejs.mu), "; BME = ", round.(output.imp_sample.bme[1]; sigdigits = C_PR_SIGDIG), ")")
     return output
 end
 

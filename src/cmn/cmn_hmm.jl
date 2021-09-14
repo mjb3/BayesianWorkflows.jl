@@ -1,5 +1,24 @@
 #### common HMM stuff (i.e. not needed for arq)
 
+struct ObservationQuantiles
+    t::Vector{Float64}
+    y::Array{Float64,2}
+    q::Vector{Float64}
+end
+
+## compute observation quantiles
+function get_observation_quantiles(observations::Vector{Vector{Observation}}, val_index::Int64, quantiles::Vector{Float64})
+    t1 = [y.time for y in observations[1]]
+    output = zeros(length(observations[1]), length(quantiles))
+    for i in eachindex(observations[1])
+        y = [yy[i].val[val_index] for yy in observations]
+        println(" y", i, ": ", y)
+        output[i, :] .= Statistics.quantile!(y, quantiles)
+    end
+    println("predict: ", output)
+    return ObservationQuantiles(t1, output, quantiles)
+end
+
 ## choose event type
 function choose_event(cum_rates::Array{Float64,1})
     etc = rand() * cum_rates[end]
@@ -112,8 +131,26 @@ function save_to_file(results::SimResults, dpath::String)
     end # end of print observations
 end
 
+## y quantiles
+function save_to_file(x::ObservationQuantiles, fpath::String)
+    open(fpath, "w") do f
+        # print headers
+        write(f, "t")
+        for q in x.q
+            write(f, ",$q")
+        end
+        # print quantiles
+        for i in eachindex(x.t)
+            write(f, "\n$(x.t[i])")
+            for j in eachindex(x.q)
+                write(f, ",$(x.y[i,j])")
+            end
+        end
+    end
+end
+
 ## save n simulation results to file
-function save_to_file(results::Vector{SimResults}, dpath::String)
+function save_to_file(results::Vector{SimResults}, dpath::String; obs_quantiles::Vector{Float64}=[0.25, 0.5, 0.75])
     dp = string.(dpath, 1:length(results), "/")
     println("SAVING TO ", dp)
     # check dir
@@ -122,5 +159,11 @@ function save_to_file(results::Vector{SimResults}, dpath::String)
     open(string(dpath, "metadata.csv"), "w") do f
         write(f, "n\n$(length(results))")
     end
+    # quantiles
+    # NB. expand for all observed val ****
+    y = [xx.observations for xx in x]
+    y1 = get_observation_quantiles(y, 1, obs_quantiles)
+    save_to_file(y1, string(dp, "y1.csv"))
+    # sims
     save_to_file.(results, dp)
 end

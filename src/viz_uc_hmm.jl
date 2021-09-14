@@ -30,21 +30,8 @@ end
 #### observations data
 max_obs(observations::Vector{Vector{Observation}}, val_index::Int64) = maximum([observations[i][j].val[val_index] for i in eachindex(observations) for j in eachindex(observations[i])])
 
-## compute quantiles
-function get_observation_quantiles(observations::Vector{Vector{Observation}}, val_index::Int64, quantiles::Vector{Float64})
-    # t = [y.time for y in each(observations[1])]
-    output = zeros(length(observations[1]), length(quantiles))
-    for i in eachindex(observations[1])
-        y = [yy[i].val[val_index] for yy in observations]
-        println(" y", i, ": ", y)
-        output[i, :] .= Statistics.quantile!(y, quantiles)
-    end
-    println("predict: ", output)
-    return output
-end
-
 ## plot quantiles
-C_PLT_OBS_QT_TTL = "Observation quantiles:\n"
+C_PLT_OBS_QT_TTL = "Observation quantiles"
 """
     plot_observation_quantiles(x; plot_index=1, quantiles=[0.25, 0.5, 0.75])
 
@@ -52,19 +39,19 @@ Plot perecentile range for a common set of observation data sets using [UnicodeP
 
 The only input parameter required is a `Vector` of type `SimResults` (or `Vector{Observation}`), i.e. from a call to `gillespie_sim`. The first observation value is plotted by default, but another can be specified by passing an integer to the `plot_index` option.
 """
-function plot_observation_quantiles(observations::Vector{Vector{Observation}}; plot_index::Int64=1, quantiles::Vector{Float64}=[0.25, 0.5, 0.75], title::String=string(C_PLT_OBS_QT_TTL, quantiles))
+function plot_observation_quantiles(observations::Vector{Vector{Observation}}; plot_index::Int64=1, quantiles::Vector{Float64}=[0.25, 0.5, 0.75], title::String=C_PLT_OBS_QT_TTL)
     mx = max_obs(observations, plot_index)
     y = get_observation_quantiles(observations, plot_index, quantiles)
-    t1 = [y.time for y in observations[1]]
-    p = UnicodePlots.lineplot(t1, y[:,1], ylim = [0, mx + 1], title=title, name=quantiles[1])
+    # t1 = [y.time for y in observations[1]]
+    p = UnicodePlots.lineplot(y.t, y.y[:,1], ylim = [0, mx + 1], title=title, name=quantiles[1])
     for i in 2:length(quantiles)
         # t = [y.time for y in observations[i]]
-        UnicodePlots.lineplot!(p, t1, y[:,i], name=quantiles[i])
+        UnicodePlots.lineplot!(p, y.t, y.y[:,i], name=quantiles[i])
     end
     return p
 end
 # - vector of simulation trajectories
-function plot_observation_quantiles(x::Vector{SimResults}; plot_index::Int64=1, quantiles::Vector{Float64}=[0.25, 0.5, 0.75], title::String=string(C_PLT_OBS_QT_TTL, quantiles))
+function plot_observation_quantiles(x::Vector{SimResults}; plot_index::Int64=1, quantiles::Vector{Float64}=[0.25, 0.5, 0.75], title::String=C_PLT_OBS_QT_TTL)
     y = [xx.observations for xx in x]
     return plot_observation_quantiles(y; plot_index=plot_index, quantiles=quantiles, title=title)
 end

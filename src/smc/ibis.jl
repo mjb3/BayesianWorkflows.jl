@@ -123,7 +123,7 @@ function run_pibis(model::HiddenMarkovModel, theta::Array{Float64, 2}, ess_rs_cr
     # bme .*= -2
     # bme .= exp.(bme)
     output = ImportanceSample(mu, cv, theta, w, time_ns() - start_time, -bme)
-    println("- finished in ", print_runtime(output.run_time), " (AR = ", round(100.0 * k_log[2] / k_log[1]; sigdigits = 3), "%.) E(θ) = ", mu)
+    println("- finished in ", print_runtime(output.run_time), " (AR = ", round(100.0 * k_log[2] / k_log[1]; sigdigits = 3), "%.) E(θ) = ", prettify_n.(mu))
     return output
 end
 
@@ -230,6 +230,6 @@ function run_mbp_ibis(model::HiddenMarkovModel, theta::Array{Float64, 2}, ess_rs
 
     ##
     output = ImportanceSample(mu, cv, theta, w, time_ns() - start_time, -bme)
-    println("- finished in ", print_runtime(output.run_time), " (AR := ", round(100.0 * k_log[2] / k_log[1]; sigdigits = 3), "%.) E(θ) = ", mu)
+    println("- finished in ", print_runtime(output.run_time), " (AR := ", round(100.0 * k_log[2] / k_log[1]; sigdigits = 3), "%.) E(θ) = ", prettify_n.(mu))
     return output
 end
