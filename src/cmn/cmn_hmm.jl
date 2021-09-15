@@ -148,7 +148,7 @@ end
 
 ## save n simulation results to file
 function save_to_file(results::Vector{SimResults}, dpath::String; obs_quantiles::Vector{Float64}=[0.25, 0.5, 0.75], complete_trajectory=true)
-    dp = string.(dpath, 1:length(results))
+    dp = string.(dpath, "sims/", 1:length(results), "/")
     # check dir
     isdir(dpath) || mkpath(dpath)
     # metadata

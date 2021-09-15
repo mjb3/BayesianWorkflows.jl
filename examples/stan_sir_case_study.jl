@@ -146,7 +146,7 @@ function predict(results::SingleModelResults)
     save_to_file(x, string(path_out, model.name, "/predict/"); complete_trajectory=false)
     # println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
     println(plot_observations(x; plot_index=1))
-    println(BayesianWorkflows.plot_observation_quantiles(x))
+    println(plot_observation_quantiles(x))
 end
 
 ## prior predictive check
@@ -157,8 +157,9 @@ function prior_predict(freq_dep::Bool, neg_bin_om::Bool)
     prior = get_prior(freq_dep, neg_bin_om)
     parameters = rand(prior, 1000)
     x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
-    # save_to_file(x, string(path_out, model.name, "/prior_predict/"))
-    println(plot_observations(x; plot_index=1); complete_trajectory=false)
+    save_to_file(x, string(path_out, model.name, "/prior_predict/"); complete_trajectory=false)
+    println(plot_observations(x; plot_index=1))
+    println(plot_observation_quantiles(x))
 end
 
 ## simulated inference

@@ -93,10 +93,10 @@ function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribu
     end
     ## secondary analysis (mcmc)
     if validation == C_ALG_NM_MBPM
-        mcmc = run_mcmc_analysis(model, prior, obs_data; n_chains=n_val_chains, steps=n_val_steps)
+        mcmc = run_mcmc_analysis(model, prior, obs_data; n_chains=n_mcmc_chains, steps=n_mcmc_steps)
     elseif validation == C_ALG_NM_ARQ
         @assert typeof(sample_interval) == Array{Float64, 1}
-        mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval; n_chains=n_val_chains, steps=n_val_steps)
+        mcmc = run_arq_mcmc_analysis(model, prior, obs_data, sample_interval; n_chains=n_mcmc_chains, steps=n_mcmc_steps)
         # mcmc = get_mcmc_sample(mcmc.rej_sample)
     else
         mcmc = nothing
@@ -108,7 +108,8 @@ function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribu
 end
 # - multi model
 function run_inference_analysis(models::Array{DPOMPModel,1}, priors::Array{Distributions.Distribution,1}, obs_data::Array{Observation,1};
-    primary=C_ALG_NM_SMC2, validation=C_ALG_NM_MBPM, sample_intervals=nothing)
+    primary=C_ALG_NM_SMC2, n_particles=(primary==C_ALG_NM_SMC2 ? C_DF_SMC2_P : C_DF_MBPI_P), n_mutations=C_DF_MBPI_MUT,
+    validation=C_ALG_NM_MBPM, n_mcmc_chains=C_DF_MCMC_CHAINS, n_mcmc_steps=C_DF_MCMC_STEPS, sample_interval=nothing)
 
     ## check values
     @assert length(models) == length(priors)
@@ -118,7 +119,8 @@ function run_inference_analysis(models::Array{DPOMPModel,1}, priors::Array{Distr
     for i in eachindex(models)
         si = sample_intervals==nothing ? nothing : sample_intervals[i]
         r = run_inference_analysis(models[i], priors[i], obs_data;
-            primary=primary, validation=validation, sample_interval=si)
+            primary=primary, n_particles=n_particles, n_mutations=n_mutations,
+            validation=validation, n_mcmc_chains=n_mcmc_chains, n_mcmc_steps=n_mcmc_steps, sample_interval=si)
         push!(output, r)
     end
     println("- model comparison workflow complete.")
