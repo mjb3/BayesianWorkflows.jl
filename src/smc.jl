@@ -55,7 +55,7 @@ tabulate_results(results)               # show the results
 """
 function run_smc2_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1};
     np = C_DF_SMC2_P, npf = C_DF_PF_P, ess_rs_crit = C_DF_ESS_CRIT, ind_prop = true, alpha = C_DF_ALPHA)
-    
+
     mdl = get_private_model(model, prior, obs_data)
     theta_init = rand(mdl.prior, np)
     # run_pibis(model::HiddenMarkovModel, theta::Array{Float64, 2}, ess_rs_crit::Float64, ind_prop::Bool, alpha::Float64, np::Int64
@@ -89,7 +89,7 @@ tabulate_results(results)                # show the results
 ```
 
 """
-function run_mbp_ibis_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1}; np = C_DF_MBPI_P, ess_rs_crit = C_DF_MBPI_ESS_CRIT, n_props = C_DF_MBPI_MUT, ind_prop = false, alpha = C_DF_ALPHA)
+function run_mbp_ibis_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1}; np = C_DF_MBPI_P, ess_rs_crit = C_DF_MBPI_ESS_CRIT, n_props=C_DF_MBPI_MUT, ind_prop = false, alpha = C_DF_ALPHA)
     mdl = get_private_model(model, prior, obs_data)
     theta_init = rand(prior, np)
     return run_mbp_ibis(mdl, theta_init, ess_rs_crit, n_props, ind_prop, alpha)

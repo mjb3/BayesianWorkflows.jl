@@ -11,7 +11,7 @@ import DataFrames
 import Dates
 
 ## constants
-rnd_seed = 1
+rnd_seed = 3
 population_size = 763
 initial_condition = [population_size - 1, 1, 0]
 n_observations = 25
@@ -109,7 +109,7 @@ function fit_model(freq_dep::Bool, neg_bin_om::Bool)
     prior = get_prior(freq_dep, neg_bin_om)
     # - data augmented:
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
-    da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI, n_particles=20000, n_mcmc_chains=3, n_mcmc_steps=100000)
+    da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI, n_particles=12000, n_mutations=7, n_mcmc_chains=3, n_mcmc_steps=100000)
     # println("da_results MC TYPE: ", typeof(da_results.mcmc))
     tabulate_results(da_results)
     save_to_file(da_results, string(path_out, model.name, "/da/"))
@@ -190,4 +190,5 @@ results = fit_model(fd, nb)     # single model inference
 predict(results.smc_results)    # posterior predictive check
 prior_predict(fd, nb)           # prior predictive check
 # simulated_inference(fd, nb)     # simulation check
+println("workflow finished. rnd seed: ", rnd_seed)
 exit()

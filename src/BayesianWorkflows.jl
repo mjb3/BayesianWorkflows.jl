@@ -71,7 +71,7 @@ end
 ## workflows
 # - single model workflow
 function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1};
-    primary=C_ALG_NM_SMC2, n_particles=(primary==C_ALG_NM_SMC2 ? C_DF_SMC2_P : C_DF_MBPI_P),
+    primary=C_ALG_NM_SMC2, n_particles=(primary==C_ALG_NM_SMC2 ? C_DF_SMC2_P : C_DF_MBPI_P), n_mutations=C_DF_MBPI_MUT,
     validation=C_ALG_NM_MBPM, n_mcmc_chains=C_DF_MCMC_CHAINS, n_mcmc_steps=C_DF_MCMC_STEPS, sample_interval=nothing)
 
     ## type conversion
@@ -85,7 +85,7 @@ function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribu
     if primary == C_ALG_NM_SMC2
         ibis = run_smc2_analysis(model, prior, obs_data; np=n_particles)
     elseif primary == C_ALG_NM_MBPI
-        ibis = run_mbp_ibis_analysis(model, prior, obs_data; np=n_particles)
+        ibis = run_mbp_ibis_analysis(model, prior, obs_data; np=n_particles, n_props=n_mutations)
     else
         ibis = nothing
         msg = string("Algorithm '", primary, "' not recognised. Valid values are: ", (C_ALG_NM_SMC2, C_ALG_NM_MBPI))
