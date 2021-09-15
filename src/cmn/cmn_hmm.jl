@@ -149,19 +149,20 @@ end
 
 ## save n simulation results to file
 function save_to_file(results::Vector{SimResults}, dpath::String; obs_quantiles::Vector{Float64}=[0.25, 0.5, 0.75])
-    dp = string.(dpath, 1:length(results), "/")
+    dp = string.(dpath, 1:length(results))
     println("SAVING TO ", dp)
     # check dir
     isdir(dpath) || mkpath(dpath)
-    # print metadata
+    # metadata
     open(string(dpath, "metadata.csv"), "w") do f
         write(f, "n\n$(length(results))")
     end
-    # quantiles
-    # NB. expand for all observed val ****
+    # quantiles for all observed val
     y = [x.observations for x in results]
-    y1 = get_observation_quantiles(y, 1, obs_quantiles)
-    save_to_file(y1, string(dp, "y1.csv"))
+    for i in 1:length(results[1].observations[1].val)
+        yi = get_observation_quantiles(y, i, obs_quantiles)
+        save_to_file(yi, string(dpath, "y", i, ".csv"))
+    end
     # sims
     save_to_file.(results, dp)
 end

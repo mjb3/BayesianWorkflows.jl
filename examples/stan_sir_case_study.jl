@@ -10,14 +10,15 @@ import CSV
 import DataFrames
 import Dates
 
-Random.seed!(0)
-
 ## constants
+rnd_seed = 3
 population_size = 763
 initial_condition = [population_size - 1, 1, 0]
 n_observations = 40
 max_time = 40.0
-path_out = "out/flu/"
+path_out = string("out/flu/rs", rnd_seed, "/")
+
+Random.seed!(rnd_seed)
 
 ## influenza data (downloaded using 'outbreaks' pkg in R)
 data_fp = "data/influenza_england_1978_school.csv"
@@ -140,10 +141,10 @@ end
 function predict(results::SingleModelResults)
     println("\n-- POSTERIOR PREDICTIVE CHECK --")
     model = results.model
-    parameters = resample(results; n = 10)
+    parameters = resample(results; n = 1000)
     x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
     save_to_file(x, string(path_out, model.name, "/predict/"))
-    println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
+    # println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
     println(plot_observations(x; plot_index=1))
     println(BayesianWorkflows.plot_observation_quantiles(x))
 end
@@ -189,7 +190,7 @@ end
 
 ## RUN WORKFLOW FROM HERE:
 fd = true                       # frequency (or density) dependent models
-nb = false                      # -ve (or standard) binomial obs model
+nb = false                      # -ve (or plain) binomial obs model
 results = fit_model(fd, nb)     # single model inference
 # model_comparison(fd)            # compare obs models
 predict(results.smc_results)    # posterior predictive check

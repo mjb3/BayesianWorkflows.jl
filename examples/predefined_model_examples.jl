@@ -30,10 +30,10 @@ function parameter_inference_example()
     tabulate_results(results)
     ## posterior predictive check
     println("\n-- POSTERIOR PREDICTIVE CHECK:")
-    parameters = resample(results; n = 10)
+    parameters = resample(results; n=1000)
     x = gillespie_sim(model, parameters)
-    println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
-    println(plot_observations(x; plot_index=2))
+    # println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
+    # println(plot_observations(x; plot_index=2))
     println(plot_observation_quantiles(x; plot_index=2))
 end
 
@@ -74,3 +74,4 @@ model_comparison_example()
 ## SMC^2
 # results = BayesianWorkflows.run_smc2_analysis(model, prior, y)
 # tabulate_results(results)
+exit()

@@ -188,7 +188,7 @@ function gillespie_sim(model::DPOMPModel, parameters::Vector{Float64}; tmax::Flo
 end
 # - multiple parameter sets
 function gillespie_sim(model::DPOMPModel, parameters::Array{Float64, 2}; tmax::Float64 = 100.0, num_obs::Int64 = 5, n_test_types::Int64=1)
-    print("Running: ", model.name, " DGA  x ", size(parameters, 2))
+    print("Running: ", model.name, " DGA x ", size(parameters, 2))
     output = Array{SimResults,1}(undef, size(parameters, 2))
     for i in eachindex(output)
         y = generate_observations(tmax, num_obs, get_pop_size(model, parameters[:,i]), n_test_types)
