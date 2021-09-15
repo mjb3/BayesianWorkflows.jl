@@ -90,32 +90,31 @@ end
 
 ## save simulation results to file
 # NB. function overloaded per docs below
-function save_to_file(results::SimResults, dpath::String)
-    # check dir
-    isdir(dpath) || mkpath(dpath)
-    # print sequence
-    open(string(dpath, "sim.csv"), "w") do f
-        # print headers
-        write(f, "time, event")
-        for p in 1:size(results.population, 2)
-            write(f, ",val$p")
-        end
-        # print event sequence
-        for i in eachindex(results.particle.trajectory)
-            tm = results.particle.trajectory[i].time
-            tp = results.particle.trajectory[i].event_type
-            write(f, "\n$tm,$tp")
+function save_to_file(results::SimResults, dpath::String; complete_trajectory=true)
+    isdir(dpath) || mkpath(dpath)   # check dir
+    if complete_trajectory          # print sequence
+        open(string(dpath, "sim.csv"), "w") do f
+            # print headers
+            write(f, "time, event")
             for p in 1:size(results.population, 2)
-                write(f, ",$(results.population[i,p])")
+                write(f, ",val$p")
+            end
+            # print event sequence
+            for i in eachindex(results.particle.trajectory)
+                tm = results.particle.trajectory[i].time
+                tp = results.particle.trajectory[i].event_type
+                write(f, "\n$tm,$tp")
+                for p in 1:size(results.population, 2)
+                    write(f, ",$(results.population[i,p])")
+                end
             end
         end
-    end # end of print sequence
+    end                             # end of print sequence
     # print observation
     open(string(dpath, "obs.csv"), "w") do f
         # print headers
         write(f, "time,id,prop")
         for p in eachindex(results.observations[1].val)
-            # c = model.name[p]
             write(f, ",val$p")
         end
         # print event sequence
@@ -148,9 +147,8 @@ function save_to_file(x::ObservationQuantiles, fpath::String)
 end
 
 ## save n simulation results to file
-function save_to_file(results::Vector{SimResults}, dpath::String; obs_quantiles::Vector{Float64}=[0.25, 0.5, 0.75])
+function save_to_file(results::Vector{SimResults}, dpath::String; obs_quantiles::Vector{Float64}=[0.25, 0.5, 0.75], complete_trajectory=true)
     dp = string.(dpath, 1:length(results))
-    println("SAVING TO ", dp)
     # check dir
     isdir(dpath) || mkpath(dpath)
     # metadata
@@ -164,5 +162,5 @@ function save_to_file(results::Vector{SimResults}, dpath::String; obs_quantiles:
         save_to_file(yi, string(dpath, "y", i, ".csv"))
     end
     # sims
-    save_to_file.(results, dp)
+    save_to_file.(results, dp; complete_trajectory=complete_trajectory)
 end

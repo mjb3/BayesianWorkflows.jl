@@ -11,11 +11,11 @@ import DataFrames
 import Dates
 
 ## constants
-rnd_seed = 3
+rnd_seed = 1
 population_size = 763
 initial_condition = [population_size - 1, 1, 0]
-n_observations = 40
-max_time = 40.0
+n_observations = 25
+max_time = 25.0
 path_out = string("out/flu/rs", rnd_seed, "/")
 
 Random.seed!(rnd_seed)
@@ -46,7 +46,7 @@ function get_model(freq_dep::Bool, neg_bin_om::Bool)
             population[STATE_I] == y.val[OBS_BEDRIDDEN] == 0 && (return 0.0)
             population[STATE_I] < y.val[OBS_BEDRIDDEN] && (return -Inf)
             if neg_bin_om   # -ve binomial obs model
-                dist = Truncated(NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1), 0, population_size)
+                dist = truncated(NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1), 0, population_size)
             else            # binomial obs model
                 dist = Binomial(population[STATE_I], parameters[PRM_PHI])
             end
@@ -61,7 +61,7 @@ function get_model(freq_dep::Bool, neg_bin_om::Bool)
     function obs_sample!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64})
         if population[STATE_I] > 0
             if neg_bin_om   # -ve binomial obs model
-                dist = Truncated(NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1), 0, population_size)
+                dist = truncated(NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1), 0, population_size)
             else            # binomial obs model
                 dist = Binomial(population[STATE_I], parameters[PRM_PHI])
             end
@@ -88,9 +88,9 @@ end
 ## prior distribution
 function get_prior(freq_dep::Bool, neg_bin_om::Bool)
     beta_p = freq_dep ? [2.0, 1.0] : [2.0, 1.0] / population_size
-    pr_beta = Truncated(Normal(beta_p...), 0.0, Inf)
-    pr_lambda = Truncated(Normal(0.4, 0.5), 0.0, Inf)
-    phi = neg_bin_om ? Truncated(Exponential(5.0), 1.0, Inf) : Uniform(0.4, 1.0)
+    pr_beta = truncated(Normal(beta_p...), 0.0, Inf)
+    pr_lambda = truncated(Normal(0.4, 0.5), 0.0, Inf)
+    phi = neg_bin_om ? truncated(Exponential(5.0), 1.0, Inf) : Uniform(0.4, 1.0)
     t0_lim = ["1978-01-16", "1978-01-22"]
     t0_values = Dates.value.(Dates.Date.(t0_lim, "yyyy-mm-dd"))
     freq_dep && println("NB. t0 mapping: ", t0_lim, " := ", t0_values)
@@ -109,13 +109,13 @@ function fit_model(freq_dep::Bool, neg_bin_om::Bool)
     prior = get_prior(freq_dep, neg_bin_om)
     # - data augmented:
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
-    da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
+    da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI, n_particles=20000, n_mcmc_chains=3, n_mcmc_steps=100000)
     # println("da_results MC TYPE: ", typeof(da_results.mcmc))
     tabulate_results(da_results)
     save_to_file(da_results, string(path_out, model.name, "/da/"))
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
-    smc_results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
+    smc_results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep), n_mcmc_chains=5)
     # println("smc_results MC TYPE: ", typeof(smc_results.mcmc))
     tabulate_results(smc_results)
     save_to_file(smc_results, string(path_out, model.name, "/smc/"))
@@ -143,7 +143,7 @@ function predict(results::SingleModelResults)
     model = results.model
     parameters = resample(results; n = 1000)
     x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
-    save_to_file(x, string(path_out, model.name, "/predict/"))
+    save_to_file(x, string(path_out, model.name, "/predict/"); complete_trajectory=false)
     # println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
     println(plot_observations(x; plot_index=1))
     println(BayesianWorkflows.plot_observation_quantiles(x))
@@ -155,16 +155,10 @@ function prior_predict(freq_dep::Bool, neg_bin_om::Bool)
     println("\n-- PRIOR PREDICTIVE CHECK --")
     model = get_model(freq_dep, neg_bin_om)
     prior = get_prior(freq_dep, neg_bin_om)
-    parameters = rand(prior, 10)
+    parameters = rand(prior, 1000)
     x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
     # save_to_file(x, string(path_out, model.name, "/prior_predict/"))
-    println(plot_observations(x; plot_index=1))
-    # for i in eachindex(x)
-    #     println("PARAMS: ", parameters[:,i])
-    #     println(plot_trajectory(x[i]))             # plot a full state trajectory (optional)
-    #     println("OBS: ", x[i].observations)
-    #     println(plot_observations(x[i]))
-    # end
+    println(plot_observations(x; plot_index=1); complete_trajectory=false)
 end
 
 ## simulated inference

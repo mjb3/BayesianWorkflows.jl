@@ -56,7 +56,7 @@ function plot_observation_quantiles(x::Vector{SimResults}; plot_index::Int64=1, 
     return plot_observation_quantiles(y; plot_index=plot_index, quantiles=quantiles, title=title)
 end
 
-C_PLT_OBS_TTL = "Observation trajectory"
+C_PLT_OBS_TTL = "Observations trajectory"
 """
     plot_observations(x; plot_index=1)
 

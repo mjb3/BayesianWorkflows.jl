@@ -72,7 +72,7 @@ end
 # - single model workflow
 function run_inference_analysis(model::DPOMPModel, prior::Distributions.Distribution, obs_data::Array{Observation,1};
     primary=C_ALG_NM_SMC2, n_particles=(primary==C_ALG_NM_SMC2 ? C_DF_SMC2_P : C_DF_MBPI_P),
-    validation=C_ALG_NM_MBPM, n_val_chains=C_DF_MCMC_CHAINS, n_val_steps=C_DF_MCMC_STEPS, sample_interval=nothing)
+    validation=C_ALG_NM_MBPM, n_mcmc_chains=C_DF_MCMC_CHAINS, n_mcmc_steps=C_DF_MCMC_STEPS, sample_interval=nothing)
 
     ## type conversion
     get_type_vals(x) = [getfield(x, v) for v in fieldnames(typeof(x))]
