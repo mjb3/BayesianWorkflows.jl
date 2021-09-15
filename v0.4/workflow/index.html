@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Bayesian workflow for DPOMP model · BayesianWorkflows.jl docs</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">BayesianWorkflows.jl docs</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><a class="tocitem" href="../manual/">Package manual</a></li><li><a class="tocitem" href="../models/">DPOMP models</a></li><li class="is-active"><a class="tocitem" href>Bayesian workflow for DPOMP model</a><ul class="internal"><li><a class="tocitem" href="#Data"><span>Data</span></a></li><li><a class="tocitem" href="#Model"><span>Model</span></a></li><li><a class="tocitem" href="#Prior-distribution"><span>Prior distribution</span></a></li><li><a class="tocitem" href="#Define-workflow"><span>Define workflow</span></a></li><li><a class="tocitem" href="#Run-complete-workflow"><span>Run complete workflow</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Bayesian workflow for DPOMP model</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Bayesian workflow for DPOMP model</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/mjb3/BayesianWorkflows.jl/blob/master/docs/src/workflow.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Bayesian-workflow-for-DPOMP-model"><a class="docs-heading-anchor" href="#Bayesian-workflow-for-DPOMP-model">Bayesian workflow for DPOMP model</a><a id="Bayesian-workflow-for-DPOMP-model-1"></a><a class="docs-heading-anchor-permalink" href="#Bayesian-workflow-for-DPOMP-model" title="Permalink"></a></h1><h2 id="Data"><a class="docs-heading-anchor" href="#Data">Data</a><a id="Data-1"></a><a class="docs-heading-anchor-permalink" href="#Data" title="Permalink"></a></h2><pre><code class="language-julia hljs">using BayesianWorkflows
+using Distributions
+import Random
+import CSV
+import DataFrames
+import Dates
+
+Random.seed!(1)
+
+## constants
+population_size = 763
+initial_condition = [population_size - 1, 1, 0]
+n_observations = 40
+max_time = 40.0
+
+## influenza data (downloaded using &#39;outbreaks&#39; pkg in R)
+data_fp = &quot;data/influenza_england_1978_school.csv&quot;
+y = get_observations(data_fp; time_col=2, val_seq=3:4)
+println(plot_observations(y; plot_index=1))</code></pre><h2 id="Model"><a class="docs-heading-anchor" href="#Model">Model</a><a id="Model-1"></a><a class="docs-heading-anchor-permalink" href="#Model" title="Permalink"></a></h2><pre><code class="language-julia hljs">function get_model(freq_dep::Bool)
+    STATE_S = 1
+    STATE_I = 2
+    STATE_R = 3
+    PRM_BETA = 1
+    PRM_GAMMA = 2
+    PRM_PHI = 3
+    model = generate_model(&quot;SIR&quot;, initial_condition; freq_dep=freq_dep, t0_index=4)
+    ## statistical model (or &#39;observation&#39; model in the context of DPOMPs)
+    OBS_BEDRIDDEN = 1
+    OBS_CONV = 2
+    function obs_model(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Array{Float64,1})
+        try
+            population[STATE_I] == y.val[OBS_BEDRIDDEN] == 0 &amp;&amp; (return 0.0)
+            population[STATE_I] &lt; y.val[OBS_BEDRIDDEN] &amp;&amp; (return -Inf)
+            obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
+            return logpdf(obs_dist, y.val[OBS_BEDRIDDEN])
+        catch e
+            throw(e)
+        end
+    end
+    model.obs_model = obs_model
+    ## for sampling y
+    function obs_fn!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64})
+        if population[STATE_I] &gt; 0
+            obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
+            y.val[OBS_BEDRIDDEN] = max(rand(obs_dist), population_size)
+        else
+            y.val[OBS_BEDRIDDEN] = 0
+        end
+        y.val[OBS_CONV] = population[STATE_R]
+    end
+    model.obs_function = obs_fn!
+    return model
+end</code></pre><h2 id="Prior-distribution"><a class="docs-heading-anchor" href="#Prior-distribution">Prior distribution</a><a id="Prior-distribution-1"></a><a class="docs-heading-anchor-permalink" href="#Prior-distribution" title="Permalink"></a></h2><pre><code class="language-julia hljs">function get_prior(freq_dep::Bool)
+    beta_p = freq_dep ? [2.0, 1.0] : [2.0, 1.0] / population_size
+    pr_beta = Truncated(Normal(beta_p...), 0.0, Inf)
+    pr_lambda = Truncated(Normal(0.4, 0.5), 0.0, Inf)
+    phi_inv = Truncated(Exponential(5.0), 1.0, Inf)
+    t0_lim = [&quot;1978-01-16&quot;, &quot;1978-01-22&quot;]
+    t0_values = Dates.value.(Dates.Date.(t0_lim, &quot;yyyy-mm-dd&quot;))
+    println(&quot;t0 mapping: &quot;, t0_lim, &quot; := &quot;, t0_values)
+    t0 = Uniform(t0_values...)
+    return Product([pr_beta, pr_lambda, phi_inv, t0])
+end</code></pre><h2 id="Define-workflow"><a class="docs-heading-anchor" href="#Define-workflow">Define workflow</a><a id="Define-workflow-1"></a><a class="docs-heading-anchor-permalink" href="#Define-workflow" title="Permalink"></a></h2><h3 id="Fit-model"><a class="docs-heading-anchor" href="#Fit-model">Fit model</a><a id="Fit-model-1"></a><a class="docs-heading-anchor-permalink" href="#Fit-model" title="Permalink"></a></h3><pre><code class="language-julia hljs">##  sampling interval for ARQMCMC algoritm:
+sample_interval(freq_dep::Bool) = [freq_dep ? 0.05 : 0.05 / population_size, 0.01, 0.05, 0.5]
+
+## fit models and check results
+function fit_model(freq_dep::Bool)
+    ## fetch model and prior:
+    model = get_model(freq_dep)
+    prior = get_prior(freq_dep)
+    # - fit using data augmented algorithms:
+    println(&quot;\n---- DATA AUGMENTATED ALGORITHMS ----&quot;)
+    da_results = run_inference_workflow(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI)
+    tabulate_results(da_results)
+    # - smc algorithms:
+    println(&quot;\n---- SMC ALGORITHMS ----&quot;)
+    smc_results = run_inference_workflow(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
+    tabulate_results(smc_results)
+    ## return as named tuple
+    return (da_results = da_results, smc_results = smc_results)
+end</code></pre><h3 id="Model-comparison"><a class="docs-heading-anchor" href="#Model-comparison">Model comparison</a><a id="Model-comparison-1"></a><a class="docs-heading-anchor-permalink" href="#Model-comparison" title="Permalink"></a></h3><p>Compare density vs. frequency dependent models:</p><pre><code class="language-julia hljs">function model_comparison()
+    models = get_model.([false, true])
+    priors = get_prior.([false, true])
+    sample_intervals = sample_interval.([false, true])
+    ## run analysis
+    results = run_inference_workflow(models, priors, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_intervals)
+    tabulate_results(results)
+end</code></pre><h3 id="Posterior-predictive-check"><a class="docs-heading-anchor" href="#Posterior-predictive-check">Posterior predictive check</a><a id="Posterior-predictive-check-1"></a><a class="docs-heading-anchor-permalink" href="#Posterior-predictive-check" title="Permalink"></a></h3><p>I.e. resample parameters from posterior samples and simulate.</p><pre><code class="language-julia hljs">function predict(results::SingleModelResults)
+    println(&quot;\n-- POSTERIOR PREDICTIVE CHECK --&quot;)
+    model = results.model
+    parameters = resample(results; n = 10)
+    x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
+    println(plot_trajectory(x[1]))             # plot a full state trajectory (optional)
+    println(plot_observations(x; plot_index=1))
+end</code></pre><h3 id="Prior-distribution-predictive-check"><a class="docs-heading-anchor" href="#Prior-distribution-predictive-check">Prior distribution predictive check</a><a id="Prior-distribution-predictive-check-1"></a><a class="docs-heading-anchor-permalink" href="#Prior-distribution-predictive-check" title="Permalink"></a></h3><p>Same but sample parameters from prior:</p><pre><code class="language-julia hljs">function prior_predict(freq_dep::Bool)
+    println(&quot;\n-- PRIOR PREDICTIVE CHECK --&quot;)
+    model = get_model(freq_dep)
+    prior = get_prior(freq_dep)
+    parameters = rand(prior, 10)
+    x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
+    println(plot_observations(x; plot_index=1))
+end</code></pre><h3 id="Simulated-data-check"><a class="docs-heading-anchor" href="#Simulated-data-check">Simulated data check</a><a id="Simulated-data-check-1"></a><a class="docs-heading-anchor-permalink" href="#Simulated-data-check" title="Permalink"></a></h3><pre><code class="language-julia hljs">function simulated_inference(freq_dep::Bool)
+    println(&quot;\n-- SIMULATED INFERENCE CHECK --&quot;)
+    model = get_model(freq_dep)
+    prior = get_prior(freq_dep)
+    ## simulate observations
+    parameters = rand(prior)
+    x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
+    println(plot_trajectory(x))
+    println(plot_observations(x.observations))
+    plot_observations
+    ## run inference
+    # - data augmented:
+    println(&quot;\n---- DATA AUGMENTATED ALGORITHMS ----&quot;)
+    da_results = run_inference_workflow(model, prior, x.observations; primary=BayesianWorkflows.C_ALG_NM_MBPI)
+    tabulate_results(da_results)
+    # - smc:
+    println(&quot;\n---- SMC ALGORITHMS ----&quot;)
+    smc_results = run_inference_workflow(model, prior, x.observations; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
+    tabulate_results(smc_results)
+end</code></pre><h2 id="Run-complete-workflow"><a class="docs-heading-anchor" href="#Run-complete-workflow">Run complete workflow</a><a id="Run-complete-workflow-1"></a><a class="docs-heading-anchor-permalink" href="#Run-complete-workflow" title="Permalink"></a></h2><pre><code class="language-julia hljs">dd_results = fit_model(false)   # single model inference:
+fd_results = fit_model(true)
+model_comparison()              # compare models
+predict(fd_results.smc_results) # posterior predictive check
+prior_predict(true)             # prior predictive check
+simulated_inference(true)       # simulation check</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../models/">« DPOMP models</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.6 on <span class="colophon-date" title="Wednesday 15 September 2021 00:01">Wednesday 15 September 2021</span>. Using Julia version 1.5.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
