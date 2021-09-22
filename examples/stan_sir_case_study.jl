@@ -9,15 +9,18 @@ import Random
 import CSV
 import DataFrames
 import Dates
+import Statistics
 
 ## constants
-rnd_seed = 3
+rnd_seed = length(ARGS) == 0 ? 0 : parse(Int, ARGS[1])
 population_size = 763
 initial_condition = [population_size - 1, 1, 0]
 n_observations = 25
 max_time = 25.0
 path_out = string("out/flu/rs", rnd_seed, "/")
 
+## initialise
+println("beginning workflow, random seed := ", rnd_seed)
 Random.seed!(rnd_seed)
 
 ## influenza data (downloaded using 'outbreaks' pkg in R)
@@ -95,11 +98,12 @@ function get_prior(freq_dep::Bool, neg_bin_om::Bool)
     t0_values = Dates.value.(Dates.Date.(t0_lim, "yyyy-mm-dd"))
     freq_dep && println("NB. t0 mapping: ", t0_lim, " := ", t0_values)
     t0 = Uniform(t0_values...)
-    return Product([pr_beta, pr_lambda, phi, t0])
+    output = Product([pr_beta, pr_lambda, phi, t0])
+    return output
 end
 
 ##  sampling interval for ARQMCMC algoritm:
-sample_interval(freq_dep::Bool) = [freq_dep ? 0.05 : 0.05 / population_size, 0.01, 0.05, 0.5]
+sample_interval(freq_dep::Bool) = [freq_dep ? 0.05 : 0.05 / population_size, 0.01, 0.02, 0.5]
 
 ## fit models and check results
 function fit_model(freq_dep::Bool, neg_bin_om::Bool)
@@ -110,13 +114,11 @@ function fit_model(freq_dep::Bool, neg_bin_om::Bool)
     # - data augmented:
     println("\n---- DATA AUGMENTATED ALGORITHMS ----")
     da_results = run_inference_analysis(model, prior, y; primary=BayesianWorkflows.C_ALG_NM_MBPI, n_particles=12000, n_mutations=7, n_mcmc_chains=3, n_mcmc_steps=100000)
-    # println("da_results MC TYPE: ", typeof(da_results.mcmc))
     tabulate_results(da_results)
     save_to_file(da_results, string(path_out, model.name, "/da/"))
     # - smc:
     println("\n---- SMC ALGORITHMS ----")
     smc_results = run_inference_analysis(model, prior, y; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep), n_mcmc_chains=5)
-    # println("smc_results MC TYPE: ", typeof(smc_results.mcmc))
     tabulate_results(smc_results)
     save_to_file(smc_results, string(path_out, model.name, "/smc/"))
     ## return as named tuple
@@ -173,23 +175,23 @@ function simulated_inference(freq_dep::Bool, neg_bin_om::Bool)
     println(plot_trajectory(x))
     println(plot_observations(x.observations))
     ## run inference
-    # - data augmented:
-    # println("\n---- DATA AUGMENTATED ALGORITHMS ----")
-    # da_results = run_inference_analysis(model, prior, x.observations; primary=BayesianWorkflows.C_ALG_NM_MBPI)
-    # tabulate_results(da_results)
-    # - smc:
     println("\n---- SMC ALGORITHMS ----")
-    smc_results = run_inference_analysis(model, prior, x.observations; validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep))
-    tabulate_results(smc_results)
+    results = run_inference_analysis(model, prior, x.observations;
+        primary=BayesianWorkflows.C_ALG_NM_MBPI, n_particles=12000, n_mutations=7,
+        validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep), n_mcmc_steps=100000)
+    tabulate_results(results)
+    save_to_file(results, string(path_out, model.name, "/sim/"))
 end
 
 ## RUN WORKFLOW FROM HERE:
-fd = true                       # frequency (or density) dependent models
-nb = false                      # -ve (or plain) binomial obs model
-results = fit_model(fd, nb)     # single model inference
-# model_comparison(fd)            # compare obs models
-predict(results.smc_results)    # posterior predictive check
-prior_predict(fd, nb)           # prior predictive check
-# simulated_inference(fd, nb)     # simulation check
+fd = true                               # frequency (or density) dependent models
+# nb = true                             # -ve (or plain) binomial obs model
+prior_predict.(fd, [true, false])       # prior predictive check
+results = fit_model(fd, true)           # single model inference
+predict(results.smc_results)            # posterior predictive check
+results = fit_model(fd, false)          # single model inference
+predict(results.smc_results)            # posterior predictive check
+simulated_inference.(fd, [true, false]) # simulation check
+model_comparison(fd)                    # compare obs models
 println("workflow finished. rnd seed: ", rnd_seed)
 exit()

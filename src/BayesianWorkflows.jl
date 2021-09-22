@@ -109,7 +109,7 @@ end
 # - multi model
 function run_inference_analysis(models::Array{DPOMPModel,1}, priors::Array{Distributions.Distribution,1}, obs_data::Array{Observation,1};
     primary=C_ALG_NM_SMC2, n_particles=(primary==C_ALG_NM_SMC2 ? C_DF_SMC2_P : C_DF_MBPI_P), n_mutations=C_DF_MBPI_MUT,
-    validation=C_ALG_NM_MBPM, n_mcmc_chains=C_DF_MCMC_CHAINS, n_mcmc_steps=C_DF_MCMC_STEPS, sample_interval=nothing)
+    validation=C_ALG_NM_MBPM, n_mcmc_chains=C_DF_MCMC_CHAINS, n_mcmc_steps=C_DF_MCMC_STEPS, sample_intervals=nothing)
 
     ## check values
     @assert length(models) == length(priors)

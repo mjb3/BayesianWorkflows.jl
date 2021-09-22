@@ -152,12 +152,13 @@ function save_to_file(results::Vector{SimResults}, dpath::String; obs_quantiles:
     # check dir
     isdir(dpath) || mkpath(dpath)
     # metadata
+    ny = length(results[1].observations[1].val)
     open(string(dpath, "metadata.csv"), "w") do f
-        write(f, "n\n$(length(results))")
+        write(f, "n,ny\n$(length(results)),$(ny)")
     end
     # quantiles for all observed val
     y = [x.observations for x in results]
-    for i in 1:length(results[1].observations[1].val)
+    for i in 1:ny
         yi = get_observation_quantiles(y, i, obs_quantiles)
         save_to_file(yi, string(dpath, "y", i, ".csv"))
     end
