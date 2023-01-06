@@ -13,7 +13,7 @@ A `mutable struct` which represents a DSSCT model (see [Models](@ref) for furthe
 - `event_rates!`        -- event rate function.
 - `initial_state`       -- function for sampling initial model (i.e. population) state.
 - `transition!`         -- transition function of form f!(population, event_type).
-- `obs_model`           -- observation model likelihood function.
+- `obs_loglike`         -- observation model likelihood function.
 - `obs_function`        -- observation function, use this to add 'noise' to simulated observations.
 - `t0_index`            -- index of the parameter that represents the initial time. `0` if fixed at `0.0`.
 

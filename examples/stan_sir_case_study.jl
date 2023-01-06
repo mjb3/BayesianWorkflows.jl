@@ -24,7 +24,7 @@ println("beginning workflow, random seed := ", rnd_seed)
 Random.seed!(rnd_seed)
 
 ## influenza data (downloaded using 'outbreaks' pkg in R)
-data_fp = "data/influenza_england_1978_school.csv"
+data_fp =  joinpath(@__DIR__, "../data/influenza_england_1978_school.csv")
 y = get_observations(data_fp; time_col=2, val_seq=3:4)
 # df = CSV.read(data_fp, DataFrames.DataFrame)
 # println("----\ndf: ", df, "----\ny: ", y)
@@ -194,4 +194,5 @@ predict(results.smc_results)            # posterior predictive check
 simulated_inference.(fd, [true, false]) # simulation check
 model_comparison(fd)                    # compare obs models
 println("workflow finished. rnd seed: ", rnd_seed)
-exit()
+
+# exit()

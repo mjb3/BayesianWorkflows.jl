@@ -74,4 +74,5 @@ model_comparison_example()
 ## SMC^2
 # results = BayesianWorkflows.run_smc2_analysis(model, prior, y)
 # tabulate_results(results)
-exit()
+
+# exit()

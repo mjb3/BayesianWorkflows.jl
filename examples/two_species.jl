@@ -48,7 +48,7 @@ function get_model(freq_dep::Bool)
             throw(e)
         end
     end
-    model.obs_model = obs_model
+    model.obs_loglike = obs_model
     ## for sampling y
     function obs_fn!(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Vector{Float64})
         obs_dist = NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1)
