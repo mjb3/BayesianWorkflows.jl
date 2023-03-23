@@ -47,10 +47,11 @@ function get_model(freq_dep::Bool, neg_bin_om::Bool)
     function obs_loglike(y::BayesianWorkflows.Observation, population::Array{Int64,1}, parameters::Array{Float64,1})
         try
             population[STATE_I] == y.val[OBS_BEDRIDDEN] == 0 && (return 0.0)
-            population[STATE_I] < y.val[OBS_BEDRIDDEN] && (return -Inf)
+            population[STATE_I] == 0 && (return -Inf)
             if neg_bin_om   # -ve binomial obs model
                 dist = truncated(NegativeBinomial(population[STATE_I], parameters[PRM_PHI]^-1), 0, population_size)
             else            # binomial obs model
+                # population[STATE_I] < y.val[OBS_BEDRIDDEN] && (return -Inf)
                 dist = Binomial(population[STATE_I], parameters[PRM_PHI])
             end
             return logpdf(dist, y.val[OBS_BEDRIDDEN])
@@ -165,18 +166,29 @@ function prior_predict(freq_dep::Bool, neg_bin_om::Bool)
 end
 
 ## simulated inference
-function simulated_inference(freq_dep::Bool, neg_bin_om::Bool)
+function simulated_inference(freq_dep::Bool, neg_bin_om::Bool, use_scenario=1)
     println("\n-- SIMULATED INFERENCE CHECK --")
     model = get_model(freq_dep, neg_bin_om)
     prior = get_prior(freq_dep, neg_bin_om)
-    ## simulate observations
-    parameters = rand(prior)
-    x = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations)
-    println(plot_trajectory(x))
-    println(plot_observations(x.observations))
+    ## recursive: simulate n observations
+    function sim_n()
+        parameters = rand(prior)
+        xx = gillespie_sim(model, parameters; tmax=max_time, num_obs=n_observations, n_sims=100)
+        yc = sum([y.val[1] for y in xx[use_scenario].observations])
+        if yc > 30 && yc < 1000
+            println("yc: ", yc)
+            return xx
+        else
+            return sim_n()
+        end
+    end
+    x = sim_n()
+    println(plot_observations(x))
+    println(plot_trajectory(x[use_scenario]))
+    println(plot_observations(x[use_scenario].observations))
+    save_to_file(x, string(path_out, model.name, "/sim_predict/"); complete_trajectory=false)
     ## run inference
-    println("\n---- SMC ALGORITHMS ----")
-    results = run_inference_analysis(model, prior, x.observations;
+    results = run_inference_analysis(model, prior, x[use_scenario].observations;
         primary=BayesianWorkflows.C_ALG_NM_MBPI, n_particles=12000, n_mutations=7,
         validation=BayesianWorkflows.C_ALG_NM_ARQ, sample_interval=sample_interval(freq_dep), n_mcmc_steps=100000)
     tabulate_results(results)
@@ -186,12 +198,13 @@ end
 ## RUN WORKFLOW FROM HERE:
 fd = true                               # frequency (or density) dependent models
 # nb = true                             # -ve (or plain) binomial obs model
-prior_predict.(fd, [true, false])       # prior predictive check
-results = fit_model(fd, true)           # single model inference
-predict(results.smc_results)            # posterior predictive check
-results = fit_model(fd, false)          # single model inference
-predict(results.smc_results)            # posterior predictive check
-simulated_inference.(fd, [true, false]) # simulation check
+# prior_predict.(fd, [true, false])       # prior predictive check
+# results = fit_model(fd, true)           # single model inference
+# predict(results.smc_results)            # posterior predictive check
+# results = fit_model(fd, false)          # single model inference
+# predict(results.smc_results)            # posterior predictive check
+# simulated_inference.(fd, [true, false]) # simulation check
+# simulated_inference(fd, true) # simulation check
 model_comparison(fd)                    # compare obs models
 println("workflow finished. rnd seed: ", rnd_seed)
 exit()
