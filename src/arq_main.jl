@@ -29,7 +29,7 @@ const C_ALG_DAUG  = "DAQ"
 # const C_ALG_AD  = "ADARQ"
 
 ##
-export ARQModel, ARQMCMCSample#, run_arq_mcmc_analysis, GridPoint
+export ARQModel, ARQMCMCSample, GridPoint#, run_arq_mcmc_analysis
 export tabulate_results
 export plot_parameter_trace, plot_parameter_marginal, plot_parameter_heatmap
 

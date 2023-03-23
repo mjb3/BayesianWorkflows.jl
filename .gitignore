@@ -29,3 +29,6 @@ Manifest.toml
 examples/thesis/*
 src/sandpit.jl
 db/*
+
+# IDE
+.vscode/

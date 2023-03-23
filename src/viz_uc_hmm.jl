@@ -43,10 +43,10 @@ function plot_observation_quantiles(observations::Vector{Vector{Observation}}; p
     mx = max_obs(observations, plot_index)
     y = get_observation_quantiles(observations, plot_index, quantiles)
     # t1 = [y.time for y in observations[1]]
-    p = UnicodePlots.lineplot(y.t, y.y[:,1], ylim = [0, mx + 1], title=title, name=quantiles[1])
+    p = UnicodePlots.lineplot(y.t, y.y[:,1], ylim = [0, mx + 1], title=title, name=string(quantiles[1]))
     for i in 2:length(quantiles)
         # t = [y.time for y in observations[i]]
-        UnicodePlots.lineplot!(p, y.t, y.y[:,i], name=quantiles[i])
+        UnicodePlots.lineplot!(p, y.t, y.y[:,i], name=string(quantiles[i]))
     end
     return p
 end

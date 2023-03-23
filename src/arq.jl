@@ -4,6 +4,16 @@
 include("arq_main.jl")
 using .ARQMCMC
 
+## - for direct access with ARQ model TO BE FINISHED
+function run_arq_mcmc_analysis(model::ARQModel, prior::Distributions.Distribution;
+    sample_limit::Int64 = C_DF_ARQ_SL, steps::Int64 = C_DF_MCMC_STEPS
+    , adapt_period::Int64 = df_adapt_period(steps), n_chains::Int64 = C_DF_ARQ_MC, tgt_ar::Float64 = C_DF_ARQ_AR
+    , jitter::Float64 = C_DF_ARQ_JT, sample_cache = Dict{Array{Int64, 1}, GridPoint}())
+
+    pr::Array{Distributions.Distribution,1} = [prior]
+    return ARQMCMC.run_arq_mcmc_analysis(model, pr; sample_limit=sample_limit, n_chains=n_chains, steps=steps, burnin=adapt_period, tgt_ar=tgt_ar, jitter=jitter, sample_cache=sample_cache)
+end
+
 ## - for direct access with internal model
 function run_arq_mcmc_analysis(model::HiddenMarkovModel, sample_interval::Array{Float64,1};
     sample_offset::Array{Float64, 1} = (sample_interval / 2)
@@ -13,7 +23,7 @@ function run_arq_mcmc_analysis(model::HiddenMarkovModel, sample_interval::Array{
 
     # sc::Dict{Array{Int64, 1}, ARQMCMC.GridPoint} = sample_cache
     mdl = ARQModel(get_log_pdf_fn(model, np; essc = ess_crit), sample_interval, sample_offset)
-    pr::Array{Distributions.Distribution,1} = [model.prior]
+    pr::Array{Distributions.Distribution,1} = [model.prior]    
     println("ARQ model initialised: ", model.name)
     return ARQMCMC.run_arq_mcmc_analysis(mdl, pr; sample_limit=sample_limit, n_chains=n_chains, steps=steps, burnin=adapt_period, tgt_ar=tgt_ar)#, sample_cache=sc
 end

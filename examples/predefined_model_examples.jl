@@ -53,15 +53,15 @@ end
 
 ## run examples:
 parameter_inference_example()
-model_comparison_example()
+# model_comparison_example()
 
 #### INDIVIDUAL ALGORITHM CALLS ####
 
 ## ARQMCMC
-# results = BayesianWorkflows.run_arq_mcmc_analysis(model, prior, y, sample_interval)
-# tabulate_results(results)
-# println(plot_parameter_trace(results, 1))
-# save_to_file(results, "out/arq/")
+results = BayesianWorkflows.run_arq_mcmc_analysis(model, prior, y, sample_interval)
+tabulate_results(results)
+println(plot_parameter_trace(results, 1))
+save_to_file(results, "out/arq/")
 
 ## MBP MCMC
 # results = BayesianWorkflows.run_mcmc_analysis(model, prior, y)
@@ -74,4 +74,5 @@ model_comparison_example()
 ## SMC^2
 # results = BayesianWorkflows.run_smc2_analysis(model, prior, y)
 # tabulate_results(results)
-exit()
+
+# exit()
